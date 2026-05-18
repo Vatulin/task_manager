@@ -31,12 +31,18 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username} | {self.get_department_display()} | {self.get_role_display()}"
 
-# Авто-создание профиля при регистрации пользователя
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        UserProfile.objects.create(user=instance)
 
+# ОБЪЕДИНЕННЫЙ И БЕЗОПАСНЫЙ СИГНАЛ
 @receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+def manage_user_profile(sender, instance, created, **kwargs):
+    if created:
+        # Если пользователь только что создан, создаем ему профиль
+        UserProfile.objects.create(user=instance)
+    else:
+        # Если пользователь обновляется (например, при входе обновляется last_login),
+        # безопасно проверяем существование профиля перед сохранением
+        if hasattr(instance, 'profile'):
+            instance.profile.save()
+        else:
+            # Если профиля почему-то нет (случай с вашим суперюзером egorv), создаем его
+            UserProfile.objects.create(user=instance)

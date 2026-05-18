@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Регистрация нового сотрудника{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <div class="max-w-md w-full space-y-6 bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+        <div>
+            <h2 class="text-center text-2xl font-black text-gray-900 tracking-tight">
+                Добавление сотрудника
+            </h2>
+            <p class="mt-1.5 text-center text-sm text-gray-500">
+                Создайте учетную запись и определите место сотрудника в оргструктуре
+            </p>
+        </div>
+        
+        <form class="space-y-4" method="POST">
+            {% csrf_token %}
+            
+            {% if form.errors and not form.non_field_errors %}
+                <div class="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-xs font-medium">
+                    Пожалуйста, проверьте правильность заполнения полей ниже.
+                </div>
+            {% endif %}
+            {% if form.non_field_errors %}
+                <div class="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-xl text-xs font-medium">
+                    {{ form.non_field_errors.0 }}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="space-y-1">
+                    <label for="{{ field.id_for_label }}" class="block text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        {{ field.label }}
+                    </label>
+                    
+                    {% if field.field.widget.input_type == 'select' %}
+                        <select name="{{ field.name }}" id="{{ field.id_for_label }}" class="w-full border border-gray-200 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white text-gray-700 font-medium cursor-pointer transition shadow-sm">
+                            {% for value, text in field.field.choices %}
+                                <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ text }}</option>
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                        <input type="{{ field.field.widget.input_type|default:'text' }}" 
+                               name="{{ field.name }}" 
+                               id="{{ field.id_for_label }}" 
+                               value="{{ field.value|default:'' }}" 
+                               class="w-full border border-gray-200 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-gray-800" 
+                               {% if field.field.required %}required{% endif %}>
+                    {% endif %}
+                    
+                    {% if field.help_text %}
+                        <p class="text-[11px] text-gray-400 leading-tight px-1">{{ field.help_text|safe }}</p>
+                    {% endif %}
+                    
+                    {% if field.errors %}
+                        <p class="text-xs text-rose-600 font-medium px-1">⚠️ {{ field.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="pt-3">
+                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition shadow-sm">
+                    Зарегистрировать и войти
+                </button>
+            </div>
+        </form>
+        
+        <div class="text-center pt-2 border-t border-gray-100">
+            <p class="text-xs text-gray-500">
+                Сотрудник уже зарегистрирован? 
+                <a href="{% url 'users:login' %}" class="font-bold text-indigo-600 hover:text-indigo-500 transition underline">
+                    Войти в систему
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

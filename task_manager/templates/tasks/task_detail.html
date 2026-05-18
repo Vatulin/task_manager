@@ -5,7 +5,7 @@
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 py-6">
     <div class="mb-4">
-        <a href="{% url 'home' %}" class="text-sm text-indigo-600 hover:underline">← Назад к списку задач</a>
+        <a href="{% url 'tasks:task_list' %}" class="text-sm text-indigo-600 hover:underline">← Назад к списку задач</a>
     </div>
 
     <div class="bg-white shadow rounded-lg p-6 mb-6">
@@ -51,7 +51,7 @@
         <h2 class="text-lg font-bold text-gray-900 mb-4">Обсуждение задачи</h2>
 
         {% if user.is_authenticated %}
-        <form action="{% url 'add_comment' task.id %}" method="POST" class="mb-6">
+        <form action="{% url 'tasks:add_comment' task.id %}" method="POST" class="mb-6">
             {% csrf_token %}
             <div>
                 <textarea name="content" rows="3" required

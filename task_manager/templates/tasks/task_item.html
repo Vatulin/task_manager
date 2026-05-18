@@ -1,6 +1,6 @@
 <div class="border-l-4 {% if task.priority == 'HIGH' %}border-red-500{% elif task.priority == 'MEDIUM' %}border-yellow-500{% else %}border-green-500{% endif %} bg-gray-50 p-4 rounded-r-lg flex justify-between items-center shadow-xs hover:bg-gray-100 transition-all duration-200">
     
-    <a href="{% url 'task_detail' task.id %}" class="flex-1 pr-4">
+    <a href="{% url 'tasks:task_detail' task.id %}" class="flex-1 pr-4">
         <div>
             <span class="text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded bg-gray-200 text-gray-700 mr-2">
                 {{ task.get_period_display }}

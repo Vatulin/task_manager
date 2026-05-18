@@ -3,30 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Task Manager{% endblock %}</title>
+    <title>{% block title %}Панель управления{% endblock %} | Суверенный Таск-Менеджер</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
-<body class="bg-gray-50 text-gray-900 font-sans">
+<body class="bg-gray-50/50 text-gray-900 flex flex-col min-h-screen font-sans">
 
-    <nav class="bg-indigo-600 text-white shadow-md">
+    <nav class="bg-white border-b border-gray-100 shadow-xs sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <span class="font-bold text-xl tracking-wider">Трекер задач</span>
+            <div class="flex justify-between h-16">
+                
+                <div class="flex items-center space-x-8">
+                    <a href="{% url 'users:dashboard' %}" class="flex items-center space-x-2 text-indigo-600 font-black text-xl tracking-tight">
+                        <span>⚡ Task.ЦС</span>
+                    </a>
+
+                    {% if user.is_authenticated %}
+                        <div class="hidden md:flex space-x-1">
+                            <a href="{% url 'users:dashboard' %}" class="text-sm font-bold text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition px-3 py-2 rounded-xl">
+                                Панель управления
+                            </a>
+                            <a href="{% url 'tasks:task_list' %}" class="text-sm font-bold text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition px-3 py-2 rounded-xl">
+                                Мои Задачи
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
-                <div class="flex space-x-4">
-                    <a href="{% url 'home' %}" class="px-3 py-2 rounded-md text-sm font-medium bg-indigo-700">Дашборд</a>
-                    <a href="/admin/" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-500">Админка</a>
+
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        <div class="flex items-center space-x-3 border-r border-gray-100 pr-4">
+                            <div class="text-right hidden sm:block">
+                                <p class="text-xs font-black text-gray-800 leading-tight">
+                                    {{ user.get_full_name|default:user.username }}
+                                </p>
+                                <p class="text-[10px] text-indigo-600 font-bold uppercase tracking-wider mt-0.5">
+                                    {{ user.profile.get_role_display|default:"Сотрудник" }}
+                                </p>
+                            </div>
+                            <div class="h-9 w-9 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center font-black text-xs uppercase tracking-wider border border-indigo-100 shadow-2xs">
+                                {{ user.username|slice:":2" }}
+                            </div>
+                        </div>
+                        
+                        <a href="{% url 'users:logout' %}" class="text-sm font-bold text-gray-500 hover:text-rose-600 border border-gray-200 hover:border-rose-100 px-3.5 py-2 rounded-xl transition bg-white shadow-2xs">
+                            Выйти
+                        </a>
+                    {% else %}
+                        <a href="{% url 'users:login' %}" class="text-sm font-bold text-gray-600 hover:text-indigo-600 px-3 py-2 transition">
+                            Войти
+                        </a>
+                        <a href="{% url 'users:register' %}" class="text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl transition shadow-xs">
+                            Регистрация сотрудников
+                        </a>
+                    {% endif %}
                 </div>
+
             </div>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {% block content %}
         {% endblock %}
     </main>
+
+    <footer class="bg-white border-t border-gray-100 py-4 text-center text-xs font-medium text-gray-400">
+        &copy; 2026 Task.ЦС &bull; Разработано на Хакатоне ЦС 4.0 в закрытом контуре
+    </footer>
 
 </body>
 </html>
