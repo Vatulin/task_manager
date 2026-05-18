@@ -9,18 +9,21 @@ def index(request):
     user = request.user
     profile = getattr(user, 'profile', None)
     
-    # Базовый QuerySet с оптимизацией запроса к базе
-    queryset = Task.objects.select_related('assignee').order_by('-created_at')
+    # Базовый запрос ко всем задачам системы с оптимизацией связей
+    queryset = Task.objects.select_related('assignee__profile').order_by('-created_at')
     
-    # Разграничение прав на просмотр списка задач
+    # 1. АДМИНИСТРАТОР: видит вообще всё
     if profile and profile.role == 'admin':
-        # Администратор видит абсолютно все задачи
         recent_tasks = queryset[:5]
+        
+    # 2. РУКОВОДИТЕЛЬ КОМАНДЫ (team_lead): видит только задачи СВОЕГО отдела
     elif profile and profile.role == 'team_lead':
-        # Руководитель видит задачи сотрудников своего отдела
+        # Находим только те задачи, у которых исполнитель (assignee) 
+        # принадлежит к тому же отделу (department), что и сам тимлид
         recent_tasks = queryset.filter(assignee__profile__department=profile.department)[:5]
+        
+    # 3. СОТРУДНИК (employee): видит исключительно СВОИ задачи
     else:
-        # Обычный сотрудник видит только те задачи, где он указан исполнителем
         recent_tasks = queryset.filter(assignee=user)[:5]
         
     return render(request, 'tasks/index.html', {'recent_tasks': recent_tasks})
@@ -33,24 +36,25 @@ def task_detail(request, task_id):
     user = request.user
     profile = getattr(user, 'profile', None)
     
-    # Проверка прав доступа к конкретной задаче (Security Check)
+    # ЖЕСТКАЯ ПРОВЕРКА ПРАВ ДОСТУПА (Защита от перехода по прямой ссылке)
     if profile and profile.role != 'admin':
+        
         if profile.role == 'team_lead':
-            # Тимлид может смотреть только задачи сотрудников своего отдела
-            # (Проверяем, совпадает ли отдел исполнителя задачи с отделом тимлида)
-            if not task.assignee or getattr(task.assignee, 'profile', None).department != profile.department:
-                raise PermissionDenied("У вас нет доступа к задачам чужого отдела.")
+            # Проверяем, есть ли исполнитель у задачи и совпадает ли его отдел с отделом тимлида
+            task_assignee_profile = getattr(task.assignee, 'profile', None) if task.assignee else None
+            
+            if not task_assignee_profile or task_assignee_profile.department != profile.department:
+                raise PermissionDenied("Вы можете просматривать задачи только вашего отдела.")
+                
         elif profile.role == 'employee':
-            # Обычный сотрудник может смотреть только свою задачу
+            # Обычный сотрудник не может зайти в чужую задачу
             if task.assignee != user:
                 raise PermissionDenied("У вас нет доступа к этой задаче.")
 
-    # Железный способ получить все choices из поля 'status', как бы они ни назывались внутри класса
+    # Логика смены статуса (POST)
     status_choices = task._meta.get_field('status').choices
-    
     if request.method == 'POST':
         new_status = request.POST.get('status')
-        # Превращаем в словарь для быстрой проверки валидности ключа
         if new_status in dict(status_choices):
             task.status = new_status
             task.save()
@@ -61,12 +65,11 @@ def task_detail(request, task_id):
     context = {
         'task': task,
         'comments': comments,
-        'status_choices': status_choices  # Передаем исправленный список в шаблон
+        'status_choices': status_choices
     }
     return render(request, 'tasks/task_detail.html', context)
 
 
-# 2. Добавление комментария
 @login_required
 @require_POST
 def add_comment(request, task_id):
@@ -75,10 +78,11 @@ def add_comment(request, task_id):
     user = request.user
     profile = getattr(user, 'profile', None)
     
-    # Проверка прав: оставлять комментарии могут только те, у кого есть доступ к задаче
+    # Проверка прав на добавление комментариев (по аналогии с детальным просмотром)
     if profile and profile.role != 'admin':
         if profile.role == 'team_lead':
-            if not task.assignee or getattr(task.assignee, 'profile', None).department != profile.department:
+            task_assignee_profile = getattr(task.assignee, 'profile', None) if task.assignee else None
+            if not task_assignee_profile or task_assignee_profile.department != profile.department:
                 raise PermissionDenied()
         elif profile.role == 'employee':
             if task.assignee != user:
@@ -87,18 +91,14 @@ def add_comment(request, task_id):
     comment_text = request.POST.get('content', '').strip()
     
     if comment_text:
-        # Узнаем, как на самом деле называются текстовые поля в вашей модели Comment
         all_fields = [f.name for f in Comment._meta.get_fields()]
-        
-        # Определяем правильное имя поля для текста
         if 'text' in all_fields:
             text_field_name = 'text'
         elif 'body' in all_fields:
             text_field_name = 'body'
         else:
-            text_field_name = 'content' # резервный вариант
+            text_field_name = 'content'
             
-        # Формируем аргументы для динамического создания объекта
         comment_kwargs = {
             'task': task,
             'author': user,
