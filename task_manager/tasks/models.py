@@ -29,6 +29,9 @@ class Task(models.Model):
         LEGAL = 'LEGAL', 'Юридический отдел'
         TALENTS = 'TALENTS', 'Направление молодых талантов'
         PMO = 'PMO', 'Проектный офис'
+    
+    def get_status_choices(self):
+        return self._meta.get_field('status').choices
 
     # Основные поля модели по ТЗ
     title = models.CharField(max_length=255, verbose_name="Название")

@@ -6,7 +6,7 @@
 <div class="px-4 py-6 sm:px-0">
     <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900">Добро пожаловать в Task Manager!</h1>
-        <p class="text-gray-600 mt-1">Здесь будет располагаться аналитика и оперативное управление целями компании.</p>
+        <p class="text-gray-600 mt-1">Оперативное управление целями компании с возможностью мгновенного обновления.</p>
     </div>
 
     <div class="bg-white shadow rounded-lg p-6">
@@ -15,20 +15,7 @@
         {% if recent_tasks %}
             <div class="space-y-4">
                 {% for task in recent_tasks %}
-                    <div class="border-l-4 {% if task.priority == 'HIGH' %}border-red-500{% elif task.priority == 'MEDIUM' %}border-yellow-500{% else %}border-green-500{% endif %} bg-gray-50 p-4 rounded-r-lg flex justify-between items-center shadow-xs">
-                        <div>
-                            <span class="text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded bg-gray-200 text-gray-700 mr-2">
-                                {{ task.get_period_display }}
-                            </span>
-                            <span class="font-medium text-gray-900">{{ task.title }}</span>
-                            <p class="text-sm text-gray-500 mt-1">Ответственный: {{ task.assignee|default:"Не назначен" }} | Дедлайн: {{ task.deadline|date:"d.m.Y H:i" }}</p>
-                        </div>
-                        <div>
-                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                {{ task.get_status_display }}
-                            </span>
-                        </div>
-                    </div>
+                    {% include 'tasks/task_item.html' %}
                 {% endfor %}
             </div>
         {% else %}

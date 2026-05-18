@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ task.title }} — Детали задачи{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-6">
+    <div class="mb-4">
+        <a href="{% url 'home' %}" class="text-sm text-indigo-600 hover:underline">← Назад к списку задач</a>
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <div class="flex justify-between items-start border-b border-gray-200 pb-4 mb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">{{ task.title }}</h1>
+                <p class="text-sm text-gray-500 mt-1">
+                    Создана: {{ task.created_at|date:"d.m.Y H:i" }} | Период: {{ task.get_period_display }}
+                </p>
+            </div>
+            
+            <form method="POST" class="flex items-center space-x-2">
+                {% csrf_token %}
+                <label for="status" class="text-sm font-medium text-gray-700">Статус:</label>
+                <select name="status" id="status" onchange="this.form.submit()" 
+                        class="rounded-md border-gray-300 shadow-sm text-sm bg-blue-50 text-blue-900 font-semibold focus:border-indigo-500 focus:ring-indigo-500 cursor-pointer">
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if task.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
+            <div>
+                <span class="font-semibold block text-gray-500 uppercase text-xs">Приоритет:</span>
+                <span class="inline-block mt-1 px-2 py-1 rounded text-xs font-bold {% if task.priority == 'HIGH' %}bg-red-100 text-red-800{% elif task.priority == 'MEDIUM' %}bg-yellow-100 text-yellow-800{% else %}bg-green-100 text-green-800{% endif %}">
+                    {{ task.get_priority_display }}
+                </span>
+            </div>
+            <div>
+                <span class="font-semibold block text-gray-500 uppercase text-xs">Исполнитель:</span>
+                <p class="mt-1 font-medium">{{ task.assignee|default:"Не назначен" }}</p>
+            </div>
+            <div>
+                <span class="font-semibold block text-gray-500 uppercase text-xs">Дедлайн:</span>
+                <p class="mt-1 text-red-600 font-medium">{{ task.deadline|date:"d.m.Y H:i" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Обсуждение задачи</h2>
+
+        {% if user.is_authenticated %}
+        <form action="{% url 'add_comment' task.id %}" method="POST" class="mb-6">
+            {% csrf_token %}
+            <div>
+                <textarea name="content" rows="3" required
+                          placeholder="Напишите, как продвигаются дела по задаче..." 
+                          class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 border"
+                ></textarea>
+            </div>
+            <div class="mt-2 text-right">
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none">
+                    Отправить комментарий
+                </button>
+            </div>
+        </form>
+        {% else %}
+        <p class="text-sm text-gray-500 italic mb-4">Только авторизованные пользователи могут оставлять комментарии.</p>
+        {% endif %}
+
+        <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
+            {% for comment in comments %}
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-semibold text-sm text-gray-900">{{ comment.author.username }}</span>
+                    <span class="text-xs text-gray-400">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
+                </div>
+                <p class="text-sm text-gray-700 whitespace-pre-line">
+                    {{ comment.text }}{{ comment.body }}{{ comment.content }}
+                </p>
+            </div>
+            {% empty %}
+            <p class="text-sm text-gray-400 text-center py-4">Здесь пока нет ни одного комментария. Будьте первым!</p>
+            {% endfor %}
+        </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
