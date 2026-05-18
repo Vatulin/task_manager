@@ -3,25 +3,30 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+class Department(models.Model):
+    name = models.CharField("Название отдела", max_length=100, unique=True)
+    code = models.CharField("Код отдела", max_length=20, blank=True, unique=True)
+
+    class Meta:
+        verbose_name = "Отдел"
+        verbose_name_plural = "Отделы"
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class UserProfile(models.Model):
     ROLE_CHOICES = [
         ("employee", "Сотрудник"),
         ("team_lead", "Руководитель команды"),
-        ("admin", "Администратор"),
-    ]
-
-    DEPARTMENT_CHOICES = [
-        ('hr', 'HR'),
-        ('aho', 'АХО'),
-        ('it', 'ИТ'),
-        ('finance', 'Финансы'),
-        ('legal', 'Юридический отдел'),
-        ('young_talents', 'Направление молодых талантов'),
-        ('project_office', 'Проектный офис'),
+        ("admin", "Администратор подразделения"),
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    department = models.CharField("Отдел", max_length=50, choices=DEPARTMENT_CHOICES, default='hr')
+    department = models.ForeignKey(
+        Department, on_delete=models.SET_NULL, null=True, blank=True, related_name="employees"
+    )
     role = models.CharField("Роль", max_length=20, choices=ROLE_CHOICES, default="employee")
 
     class Meta:
@@ -29,9 +34,11 @@ class UserProfile(models.Model):
         verbose_name_plural = "Профили сотрудников"
 
     def __str__(self):
-        return f"{self.user.username} | {self.get_department_display()} | {self.get_role_display()}"
+        dept = self.department.name if self.department else "Без отдела"
+        return f"{self.user.get_full_name() or self.user.username} | {self.get_role_display()} | {dept}"
 
-# Авто-создание профиля при регистрации пользователя
+
+# Автоматическое создание профиля при регистрации пользователя
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Добро пожаловать, {{ user.get_full_name|default:user.username }}!</h2>
+    <a href="{% url 'users:logout' %}" class="btn btn-outline-danger">Выйти</a>
+  </div>
+  
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-header bg-primary text-white">👤 Профиль</div>
+        <div class="card-body">
+          <p><strong>Роль:</strong> {{ role }}</p>
+          <p><strong>Отдел:</strong> {{ department.name|default:"Не назначен" }}</p>
+          <p><strong>Почта:</strong> {{ user.email|default:"Не указана" }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-success text-white">📋 Задачи</div>
+        <div class="card-body text-muted">
+          Здесь будет список задач сотрудника (подключится после merge с tasks/)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

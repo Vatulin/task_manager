@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4" style="max-width:750px">
+  <h3>🤖 AI-помощник руководителя</h3>
+  <form method="post" class="card p-3 mb-3">
+    {% csrf_token %}
+    <div class="input-group">
+      <input type="text" name="query" class="form-control" placeholder="Например: Какие задачи в риске?" value="{{ query }}" required>
+      <button class="btn btn-primary">Анализ</button>
+    </div>
+  </form>
+  {% if response %}
+  <div class="alert alert-info" style="white-space:pre-wrap">{{ response }}</div>
+  {% endif %}
+</div>
+{% endblock %}
