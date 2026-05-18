@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная — Панель управления{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Добро пожаловать в Task Manager!</h1>
+        <p class="text-gray-600 mt-1">Здесь будет располагаться аналитика и оперативное управление целями компании.</p>
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Последние задачи проекта</h2>
+        
+        {% if recent_tasks %}
+            <div class="space-y-4">
+                {% for task in recent_tasks %}
+                    <div class="border-l-4 {% if task.priority == 'HIGH' %}border-red-500{% elif task.priority == 'MEDIUM' %}border-yellow-500{% else %}border-green-500{% endif %} bg-gray-50 p-4 rounded-r-lg flex justify-between items-center shadow-xs">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded bg-gray-200 text-gray-700 mr-2">
+                                {{ task.get_period_display }}
+                            </span>
+                            <span class="font-medium text-gray-900">{{ task.title }}</span>
+                            <p class="text-sm text-gray-500 mt-1">Ответственный: {{ task.assignee|default:"Не назначен" }} | Дедлайн: {{ task.deadline|date:"d.m.Y H:i" }}</p>
+                        </div>
+                        <div>
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                {{ task.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500 py-4">Задач пока нет. Вы можете добавить их через <a href="/admin/tasks/task/add/" class="text-indigo-600 hover:underline">админ-панель</a>.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
