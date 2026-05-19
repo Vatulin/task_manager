@@ -91,10 +91,12 @@
                 </div>
                 <h3 class="text-sm font-bold text-indigo-950 uppercase tracking-wider">Управление пользователями</h3>
             </div>
+            
+            <!-- ✅ Исправлено: кнопки теперь в одном flex-контейнере с flex-1 для одинаковой ширины -->
             <div class="flex flex-wrap gap-3">
                 {% if can_create_team_lead %}
                 <a href="{% url 'users:create_team_lead' %}" 
-                   class="inline-flex items-center px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-indigo-200">
+                   class="flex flex-1 justify-center items-center px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-indigo-200">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
@@ -104,11 +106,21 @@
 
                 {% if can_create_employee %}
                 <a href="{% url 'users:create_employee' %}" 
-                   class="inline-flex items-center px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-emerald-200">
+                   class="flex flex-1 justify-center items-center px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-emerald-200">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                     </svg>
                     Добавить сотрудника
+                </a>
+                {% endif %}
+
+                {% if user.profile.role == 'team_lead' %}
+                <a href="{% url 'tasks:create_task' %}" 
+                   class="flex flex-1 justify-center items-center px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-indigo-200">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    Создать задачу
                 </a>
                 {% endif %}
             </div>

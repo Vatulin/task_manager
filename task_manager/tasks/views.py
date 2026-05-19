@@ -3,6 +3,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from .models import Task, Comment
+from .forms import TaskForm
 
 @login_required
 def index(request):
@@ -108,3 +109,20 @@ def add_comment(request, task_id):
         Comment.objects.create(**comment_kwargs)
         
     return redirect('tasks:task_detail', task_id=task.id)
+
+@login_required
+def create_task(request):
+    user_profile = getattr(request.user, 'profile', None)
+    
+    if not user_profile or user_profile.role != 'team_lead':
+        raise PermissionDenied("Создавать задачи могут только руководители команд.")
+
+    if request.method == 'POST':
+        form = TaskForm(request.POST, user=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('users:dashboard')
+    else:
+        form = TaskForm(user=request.user)
+
+    return render(request, 'tasks/task_form.html', {'form': form})
