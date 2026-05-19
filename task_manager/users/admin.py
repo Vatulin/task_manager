@@ -1,27 +1,21 @@
+# users/admin.py
 from django.contrib import admin
-from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
 from .models import UserProfile
 
-class UserProfileInline(admin.StackedInline):
-    model = UserProfile
-    can_delete = False
-    verbose_name_plural = "Профиль сотрудника"
-    fields = ("department", "role")  # <- автоматически станет выпадающим списком
-
-class UserAdmin(BaseUserAdmin):
-    inlines = (UserProfileInline,)
-    list_display = ("username", "first_name", "last_name", "email", "get_role", "get_department")
-    list_filter = ("is_staff", "is_superuser", "profile__role", "profile__department")
-    search_fields = ("username", "first_name", "last_name", "email")
-
-    def get_role(self, obj):
-        return obj.profile.get_role_display() if hasattr(obj, "profile") else "-"
-    get_role.short_description = "Роль"
-
-    def get_department(self, obj):
-        return obj.profile.get_department_display() if hasattr(obj, "profile") else "-"
-    get_department.short_description = "Отдел"
+class CustomUserAdmin(BaseUserAdmin):
+    pass
 
 admin.site.unregister(User)
-admin.site.register(User, UserAdmin)
+admin.site.register(User, CustomUserAdmin)
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'department', 'role')
+    list_filter = ('department', 'role')
+    search_fields = ('user__username', 'user__email')
+    readonly_fields = ('user',)
+    
+    def has_add_permission(self, request):
+        return False
