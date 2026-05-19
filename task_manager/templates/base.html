@@ -31,29 +31,26 @@
 
                 <div class="flex items-center space-x-4">
                     {% if user.is_authenticated %}
-                        <div class="flex items-center space-x-3 border-r border-gray-100 pr-4">
+                        <a href="{% url 'users:profile' user.id %}" class="flex items-center space-x-3 border-r border-gray-100 pr-4 group transition">
                             <div class="text-right hidden sm:block">
-                                <p class="text-xs font-black text-gray-800 leading-tight">
+                                <p class="text-xs font-black text-gray-800 leading-tight group-hover:text-indigo-600 transition">
                                     {{ user.get_full_name|default:user.username }}
                                 </p>
                                 <p class="text-[10px] text-indigo-600 font-bold uppercase tracking-wider mt-0.5">
                                     {{ user.profile.get_role_display|default:"Сотрудник" }}
                                 </p>
                             </div>
-                            <div class="h-9 w-9 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center font-black text-xs uppercase tracking-wider border border-indigo-100 shadow-2xs">
+                            <div class="h-9 w-9 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center font-black text-xs uppercase tracking-wider border border-indigo-100 shadow-2xs group-hover:bg-indigo-100 group-hover:text-indigo-700 transition">
                                 {{ user.username|slice:":2" }}
                             </div>
-                        </div>
+                        </a>
                         
                         <a href="{% url 'users:logout' %}" class="text-sm font-bold text-gray-500 hover:text-rose-600 border border-gray-200 hover:border-rose-100 px-3.5 py-2 rounded-xl transition bg-white shadow-2xs">
                             Выйти
                         </a>
                     {% else %}
-                        <a href="{% url 'users:login' %}" class="text-sm font-bold text-gray-600 hover:text-indigo-600 px-3 py-2 transition">
-                            Войти
-                        </a>
-                        <a href="{% url 'users:register' %}" class="text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl transition shadow-xs">
-                            Регистрация сотрудников
+                        <a href="{% url 'users:login' %}" class="text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl transition shadow-xs">
+                            Войти в систему
                         </a>
                     {% endif %}
                 </div>
