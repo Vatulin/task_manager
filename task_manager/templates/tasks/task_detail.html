@@ -29,6 +29,17 @@
             </form>
         </div>
 
+        <div class="bg-white shadow-sm rounded-xl p-6 mb-6 border border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">Описание задачи</h3>
+            <div class="text-gray-700 leading-relaxed text-sm md:text-base">
+                {% if task.description %}
+                    {{ task.description|linebreaks }}
+                {% else %}
+                    <span class="text-gray-400 italic">Описание к этой задаче не добавлено.</span>
+                {% endif %}
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
             <div>
                 <span class="font-semibold block text-gray-500 uppercase text-xs">Приоритет:</span>
@@ -38,7 +49,13 @@
             </div>
             <div>
                 <span class="font-semibold block text-gray-500 uppercase text-xs">Исполнитель:</span>
-                <p class="mt-1 font-medium">{{ task.assignee|default:"Не назначен" }}</p>
+                {% if task.assignee %}
+                    <a href="{% url 'users:profile' task.assignee.id %}" class="mt-1 inline-block font-semibold text-indigo-600 hover:text-indigo-700 hover:underline transition">
+                        {{ task.assignee.get_full_name|default:task.assignee.username }}
+                    </a>
+                {% else %}
+                    <p class="mt-1 font-medium text-gray-400 italic">Не назначен</p>
+                {% endif %}
             </div>
             <div>
                 <span class="font-semibold block text-gray-500 uppercase text-xs">Дедлайн:</span>
@@ -73,7 +90,9 @@
             {% for comment in comments %}
             <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
                 <div class="flex justify-between items-center mb-1">
-                    <span class="font-semibold text-sm text-gray-900">{{ comment.author.username }}</span>
+                    <a href="{% url 'users:profile' comment.author.id %}" class="font-semibold text-sm text-indigo-600 hover:text-indigo-700 hover:underline transition">
+                        {{ comment.author.username }}
+                    </a>
                     <span class="text-xs text-gray-400">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
                 </div>
                 <p class="text-sm text-gray-700 whitespace-pre-line">
@@ -83,7 +102,6 @@
             {% empty %}
             <p class="text-sm text-gray-400 text-center py-4">Здесь пока нет ни одного комментария. Будьте первым!</p>
             {% endfor %}
-        </div>
         </div>
     </div>
 </div>
