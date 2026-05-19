@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block title %}Отчёт: {{ department_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Заголовок и навигация -->
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+            <a href="{% url 'analytics:admin_analytics' %}" class="inline-flex items-center text-sm text-gray-500 hover:text-indigo-600 transition mb-3">
+                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Назад к аналитике
+            </a>
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight">📊 {{ department_name }}</h1>
+            <p class="text-gray-500 mt-1">Детальный мониторинг задач, сроков и загрузки отдела</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'analytics:all_departments' %}" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition text-sm font-medium">
+                Все отделы →
+            </a>
+            {% if user.profile.role == 'team_lead' or user.profile.role == 'admin' %}
+            <a href="{% url 'tasks:create_task' %}" class="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition text-sm font-medium shadow-sm">
+                + Создать задачу
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if total > 0 %}
+    <!-- 🔑 Ключевые метрики отдела -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Всего задач</p>
+                <p class="text-3xl font-bold text-gray-900 mt-2">{{ total }}</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-emerald-100">
+                <p class="text-xs font-medium text-emerald-600 uppercase tracking-wider">Выполнено</p>
+                <p class="text-3xl font-bold text-emerald-700 mt-2">{{ status_counts.completed }}</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-indigo-100">
+                <p class="text-xs font-medium text-indigo-600 uppercase tracking-wider">В работе</p>
+                <p class="text-3xl font-bold text-indigo-700 mt-2">{{ status_counts.in_progress }}</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-yellow-100">
+                <p class="text-xs font-medium text-yellow-600 uppercase tracking-wider">На согласовании</p>
+                <p class="text-3xl font-bold text-yellow-700 mt-2">{{ status_counts.under_review }}</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-rose-100">
+                <p class="text-xs font-medium text-rose-600 uppercase tracking-wider">Просрочено</p>
+                <p class="text-3xl font-bold text-rose-700 mt-2">{{ status_counts.overdue }}</p>
+                {% if status_counts.overdue > 0 %}
+                <p class="text-xs text-rose-600 mt-1 font-medium">⚠️ Требует внимания</p>
+                {% endif %}
+            </div>
+        </div>
+
+    <!-- 📅 Распределение по периодам планирования -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">🗓️ Горизонт планирования</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                
+                <!-- Год -->
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <p class="text-sm font-medium text-gray-500">Год</p>
+                    <p class="text-xl font-bold text-gray-900 mt-1">{{ period_counts.year }}</p>
+                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                        <div class="bg-indigo-600 h-1.5 rounded-full" style="width: {% widthratio period_counts.year total 100 %}%"></div>
+                    </div>
+                </div>
+                
+                <!-- Квартал -->
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <p class="text-sm font-medium text-gray-500">Квартал</p>
+                    <p class="text-xl font-bold text-gray-900 mt-1">{{ period_counts.quarter }}</p>
+                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                        <div class="bg-purple-600 h-1.5 rounded-full" style="width: {% widthratio period_counts.quarter total 100 %}%"></div>
+                    </div>
+                </div>
+                
+                <!-- Месяц -->
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <p class="text-sm font-medium text-gray-500">Месяц</p>
+                    <p class="text-xl font-bold text-gray-900 mt-1">{{ period_counts.month }}</p>
+                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                        <div class="bg-blue-600 h-1.5 rounded-full" style="width: {% widthratio period_counts.month total 100 %}%"></div>
+                    </div>
+                </div>
+                
+                <!-- Неделя -->
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <p class="text-sm font-medium text-gray-500">Неделя</p>
+                    <p class="text-xl font-bold text-gray-900 mt-1">{{ period_counts.week }}</p>
+                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                        <div class="bg-emerald-600 h-1.5 rounded-full" style="width: {% widthratio period_counts.week total 100 %}%"></div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+    <!-- 📋 Список задач отдела -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="font-bold text-gray-800">Задачи отдела</h3>
+            <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-md">Всего: {{ total }}</span>
+        </div>
+        
+        <div class="divide-y divide-gray-100">
+            {% for task in tasks %}
+            <a href="{% url 'tasks:task_detail' task.id %}" class="block p-5 hover:bg-gray-50/70 transition group">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    
+                    <!-- Левая часть: Инфо -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-gray-100 text-gray-600">
+                                {{ task.get_period_display }}
+                            </span>
+                            {% if task.priority == 'HIGH' %}
+                            <span class="text-[10px] px-2 py-0.5 bg-rose-100 text-rose-700 rounded font-bold">🔥 Высокий</span>
+                            {% elif task.priority == 'MEDIUM' %}
+                            <span class="text-[10px] px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded font-medium">⚖️ Средний</span>
+                            {% else %}
+                            <span class="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-600 rounded font-medium">📉 Низкий</span>
+                            {% endif %}
+                        </div>
+                        <h4 class="font-semibold text-gray-900 group-hover:text-indigo-600 transition truncate text-base">
+                            {{ task.title }}
+                        </h4>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Ответственный: 
+                            {% if task.assignee %}
+                                <span class="text-indigo-600 font-medium hover:underline">{{ task.assignee.get_full_name|default:task.assignee.username }}</span>
+                            {% else %}
+                                <span class="text-gray-400 italic">Не назначен</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <!-- Правая часть: Сроки и статус -->
+                    <div class="flex items-center gap-4 sm:gap-6 flex-shrink-0">
+                        {% if task.deadline %}
+                        <div class="text-right">
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider">Дедлайн</p>
+                            <p class="text-sm font-semibold 
+                                {% if task.deadline < now and task.status != 'COMPLETED' %}text-rose-600
+                                {% else %}text-gray-700{% endif %}">
+                                {{ task.deadline|date:"d.m.Y" }}
+                            </p>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Статус бейдж -->
+                        <span class="px-3 py-1 text-xs font-bold rounded-full border
+                            {% if task.status == 'COMPLETED' %}bg-emerald-50 text-emerald-700 border-emerald-200
+                            {% elif task.status == 'OVERDUE' %}bg-rose-50 text-rose-700 border-rose-200
+                            {% elif task.status == 'IN_PROGRESS' %}bg-indigo-50 text-indigo-700 border-indigo-200
+                            {% elif task.status == 'REVIEW' %}bg-yellow-50 text-yellow-700 border-yellow-200
+                            {% else %}bg-gray-50 text-gray-700 border-gray-200{% endif %}">
+                            {{ task.get_status_display }}
+                        </span>
+                        
+                        <svg class="w-5 h-5 text-gray-300 group-hover:text-indigo-500 transform group-hover:translate-x-1 transition hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Пустое состояние -->
+    <div class="bg-white p-12 rounded-2xl shadow-sm border border-gray-100 text-center">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-50 text-indigo-600 mb-4">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Задач в отделе {{ department_name }} пока нет</h3>
+        <p class="text-gray-500 mb-6 max-w-md mx-auto">Создайте первую задачу, чтобы запустить процесс планирования и отслеживания прогресса.</p>
+        <a href="{% url 'tasks:create_task' %}" class="inline-flex items-center px-5 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition font-medium shadow-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Создать задачу
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
