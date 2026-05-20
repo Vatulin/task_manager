@@ -16,20 +16,16 @@ def admin_analytics(request):
 
     now = timezone.now()
 
-    # Ключевые статусы и периоды
     STATUS_COMPLETED = Task.StatusChoices.COMPLETED.value
     PERIOD_YEAR = Task.PeriodChoices.YEAR.value
     PERIOD_QUARTER = Task.PeriodChoices.QUARTER.value
     PERIOD_MONTH = Task.PeriodChoices.MONTH.value
     PERIOD_WEEK = Task.PeriodChoices.WEEK.value
 
-    # === 1. Динамическая аналитика по отделам из БД ===
     departments_stats = []
-    # Запрашиваем все отделы, существующие в базе данных
     db_departments = Department.objects.all()
 
     for dept in db_departments:
-        # Фильтруем задачи, относящиеся к данному отделу (через ForeignKey связь в модели Task)
         dept_tasks = Task.objects.filter(department=dept)
         total = dept_tasks.count()
         completed = dept_tasks.filter(status=STATUS_COMPLETED).count()
@@ -70,13 +66,10 @@ def admin_analytics(request):
             'completion_rate': round(done / total * 100, 1) if total > 0 else 0
         }
 
-    # === 3. Просроченные задачи ===
-    # Оптимизируем запросы, подгружая и исполнителя, и его отдел
     overdue_tasks = Task.objects.filter(
         Q(deadline__lt=now) & ~Q(status=STATUS_COMPLETED)
     ).select_related('assignee__profile__department', 'parent_task')
 
-    # === 4. Загрузка сотрудников ===
     employee_stats = []
     for up in UserProfile.objects.select_related('user', 'department'):
         user_tasks = Task.objects.filter(assignee=up.user)
@@ -99,7 +92,6 @@ def admin_analytics(request):
             })
     employee_stats.sort(key=lambda x: x['active'], reverse=True)
 
-    # Данные для графика (топ-10)
     top_employees = employee_stats[:10]
     
     context = {
@@ -130,8 +122,7 @@ def department_report(request, department_code=None):
     now = timezone.now()
     STATUS_COMPLETED = Task.StatusChoices.COMPLETED.value
 
-    if department_code:
-        # Извлекаем отдел по ID, защищая от несуществующих значений
+    if department_code: 
         current_dept = get_object_or_404(Department, id=department_code)
         tasks = Task.objects.filter(department=current_dept).select_related('assignee__profile')
         department_name = current_dept.name
@@ -140,8 +131,8 @@ def department_report(request, department_code=None):
         department_name = 'Все отделы'
 
     total = tasks.count()
+    
 
-    # Подсчёт по статусам
     status_counts = {
         'new': tasks.filter(status=Task.StatusChoices.NEW.value).count(),
         'in_progress': tasks.filter(status=Task.StatusChoices.IN_PROGRESS.value).count(),

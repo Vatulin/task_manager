@@ -10,24 +10,33 @@ def index(request):
     user = request.user
     profile = getattr(user, 'profile', None)
     
-    # Базовый запрос ко всем задачам системы с оптимизацией связей
-    queryset = Task.objects.select_related('assignee__profile').order_by('-created_at')
+    sort_by = request.GET.get('sort', '-created_at')
     
-    # 1. АДМИНИСТРАТОР: видит вообще всё
+    allowed_sort_fields = {
+        '-created_at': '-created_at',
+        'created_at': 'created_at',
+        'status': 'status',
+        'deadline': 'deadline',
+        '-priority': '-priority',
+    }
+    
+    order_field = allowed_sort_fields.get(sort_by, '-created_at')
+    queryset = Task.objects.select_related('assignee__profile')
+    
     if profile and profile.role == 'admin':
-        recent_tasks = queryset[:5]
-        
-    # 2. РУКОВОДИТЕЛЬ КОМАНДЫ (team_lead): видит только задачи СВОЕГО отдела
+        filtered_queryset = queryset
     elif profile and profile.role == 'team_lead':
-        # Находим только те задачи, у которых исполнитель (assignee) 
-        # принадлежит к тому же отделу (department), что и сам тимлид
-        recent_tasks = queryset.filter(assignee__profile__department=profile.department)[:5]
-        
-    # 3. СОТРУДНИК (employee): видит исключительно СВОИ задачи
+        filtered_queryset = queryset.filter(assignee__profile__department=profile.department)
     else:
-        recent_tasks = queryset.filter(assignee=user)[:5]
+        filtered_queryset = queryset.filter(assignee=user)
         
-    return render(request, 'tasks/index.html', {'recent_tasks': recent_tasks})
+    recent_tasks = filtered_queryset.order_by(order_field)[:5]
+    
+    context = {
+        'recent_tasks': recent_tasks,
+        'current_sort': sort_by
+    }
+    return render(request, 'tasks/index.html', context)
 
 
 @login_required
@@ -37,22 +46,18 @@ def task_detail(request, task_id):
     user = request.user
     profile = getattr(user, 'profile', None)
     
-    # ЖЕСТКАЯ ПРОВЕРКА ПРАВ ДОСТУПА (Защита от перехода по прямой ссылке)
     if profile and profile.role != 'admin':
         
         if profile.role == 'team_lead':
-            # Проверяем, есть ли исполнитель у задачи и совпадает ли его отдел с отделом тимлида
             task_assignee_profile = getattr(task.assignee, 'profile', None) if task.assignee else None
             
             if not task_assignee_profile or task_assignee_profile.department != profile.department:
                 raise PermissionDenied("Вы можете просматривать задачи только вашего отдела.")
                 
         elif profile.role == 'employee':
-            # Обычный сотрудник не может зайти в чужую задачу
             if task.assignee != user:
                 raise PermissionDenied("У вас нет доступа к этой задаче.")
 
-    # Логика смены статуса (POST)
     status_choices = task._meta.get_field('status').choices
     if request.method == 'POST':
         new_status = request.POST.get('status')
@@ -78,8 +83,7 @@ def add_comment(request, task_id):
     
     user = request.user
     profile = getattr(user, 'profile', None)
-    
-    # Проверка прав на добавление комментариев (по аналогии с детальным просмотром)
+
     if profile and profile.role != 'admin':
         if profile.role == 'team_lead':
             task_assignee_profile = getattr(task.assignee, 'profile', None) if task.assignee else None
@@ -113,7 +117,6 @@ def add_comment(request, task_id):
 @login_required
 def create_task(request):
     if request.method == 'POST':
-            # Передаем request.user, чтобы метод __init__ в форме отработал корректно
             form = TaskForm(request.POST, user=request.user)
             if form.is_valid():
                 form.save()
