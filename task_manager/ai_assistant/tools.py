@@ -4,7 +4,6 @@ from django.db.models import Count
 from tasks.models import Task
 
 def get_db_snapshot() -> str:
-    """Возвращает текстовую сводку состояния базы для промпта"""
     total = Task.objects.count()
     overdue = Task.objects.filter(status__in=["new", "in_progress", "review"], deadline__lt=date.today()).count()
     in_progress = Task.objects.filter(status="in_progress").count()
@@ -22,17 +21,16 @@ def get_db_snapshot() -> str:
     - Всего задач: {total}
     - В работе: {in_progress}
     - Просрочено: {overdue}
-    - 🔥 Срочные (дедлайн завтра/сегодня): {urgent_text}
+    - Срочные (дедлайн завтра/сегодня): {urgent_text}
     """
 
 def get_task_list(keyword: str = "") -> str:
-    """Универсальный поиск. Если keyword пустой - вернет последние 5 задач"""
     qs = Task.objects.all().order_by('-created_at')
     
     if keyword and len(keyword) > 2:
         qs = qs.filter(title__icontains=keyword)
     
-    tasks = qs[:5] # Берем только топ-5, чтобы не перегружать ИИ
+    tasks = qs[:5]
     if not tasks: return "Задач по запросу не найдено."
     
     result = "СПИСОК ЗАДАЧ:\n"
