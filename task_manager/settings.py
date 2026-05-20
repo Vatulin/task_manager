@@ -5,14 +5,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users',  # ← Только users пока
-    # 'tasks', 'analytics', 'ai_assistant', ← Закомментируй, пока друг не зальёт
+    "ai_assistant",
+    'users',
 ]
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # ← Обязательно!
+        'DIRS': [BASE_DIR / 'templates'], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -28,3 +28,4 @@ TEMPLATES = [
 LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'users:dashboard'
 LOGOUT_REDIRECT_URL = 'users:login'
+OLLAMA_API_URL = "http://localhost:11434/api/generate"
