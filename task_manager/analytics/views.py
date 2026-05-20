@@ -143,7 +143,6 @@ def department_report(request, department_code=None):
         'overdue': tasks.filter(Q(deadline__lt=now) & ~Q(status=STATUS_COMPLETED)).count(),
     }
 
-    # ✅ Подсчёт по периодам (передаём в шаблон)
     period_counts = {
         'year': tasks.filter(period=Task.PeriodChoices.YEAR.value).count(),
         'quarter': tasks.filter(period=Task.PeriodChoices.QUARTER.value).count(),
