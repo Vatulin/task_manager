@@ -29,7 +29,7 @@ def role_required(allowed_roles):
 def dashboard(request):
     profile = getattr(request.user, 'profile', None)
     role_display = profile.get_role_display() if profile else "Не указана"
-    department_display = profile.get_department_display() if profile else "Не указан"
+    department_display = profile.department.name if profile and profile.department else "Без отдела"
     context = {"user": request.user, "profile": profile, "role": role_display, "department": department_display}
     return render(request, "users/dashboard.html", context)
 

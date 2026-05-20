@@ -3,73 +3,76 @@
 {% block title %}Регистрация нового сотрудника{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
-    <div class="max-w-md w-full space-y-6 bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-        <div>
-            <h2 class="text-center text-2xl font-black text-gray-900 tracking-tight">
+<div class="d-flex align-items-center justify-content-center min-vh-100 bg-light py-5 px-3">
+    <div class="card shadow-sm border-0 p-4 w-100 bg-white" style="max-width: 440px; border-radius: 1rem;">
+        
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-dark tracking-tight h4 m-0">
                 Добавление сотрудника
             </h2>
-            <p class="mt-1.5 text-center text-sm text-gray-500">
+            <p class="text-muted small m-0 mt-1.5">
                 Создайте учетную запись и определите место сотрудника в оргструктуре
             </p>
         </div>
         
-        <form class="space-y-4" method="POST">
+        <form method="POST">
             {% csrf_token %}
             
             {% if form.errors and not form.non_field_errors %}
-                <div class="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-xs font-medium">
+                <div class="alert alert-warning border-0 py-2.5 px-3 rounded mb-3 small fw-medium">
                     Пожалуйста, проверьте правильность заполнения полей ниже.
                 </div>
             {% endif %}
             {% if form.non_field_errors %}
-                <div class="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-xl text-xs font-medium">
+                <div class="alert alert-danger border-0 py-2.5 px-3 rounded mb-3 small fw-medium">
                     {{ form.non_field_errors.0 }}
                 </div>
             {% endif %}
 
-            {% for field in form %}
-                <div class="space-y-1">
-                    <label for="{{ field.id_for_label }}" class="block text-xs font-bold text-gray-400 uppercase tracking-wider">
-                        {{ field.label }}
-                    </label>
-                    
-                    {% if field.field.widget.input_type == 'select' %}
-                        <select name="{{ field.name }}" id="{{ field.id_for_label }}" class="w-full border border-gray-200 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white text-gray-700 font-medium cursor-pointer transition shadow-sm">
-                            {% for value, text in field.field.choices %}
-                                <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ text }}</option>
-                            {% endfor %}
-                        </select>
-                    {% else %}
-                        <input type="{{ field.field.widget.input_type|default:'text' }}" 
-                               name="{{ field.name }}" 
-                               id="{{ field.id_for_label }}" 
-                               value="{{ field.value|default:'' }}" 
-                               class="w-full border border-gray-200 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-gray-800" 
-                               {% if field.field.required %}required{% endif %}>
-                    {% endif %}
-                    
-                    {% if field.help_text %}
-                        <p class="text-[11px] text-gray-400 leading-tight px-1">{{ field.help_text|safe }}</p>
-                    {% endif %}
-                    
-                    {% if field.errors %}
-                        <p class="text-xs text-rose-600 font-medium px-1">⚠️ {{ field.errors.0 }}</p>
-                    {% endif %}
-                </div>
-            {% endfor %}
+            <div class="d-flex flex-column gap-3 mb-4">
+                {% for field in form %}
+                    <div class="d-flex flex-column gap-1">
+                        <label for="{{ field.id_for_label }}" class="form-label text-uppercase text-muted xsmall fw-bold tracking-wider m-0">
+                            {{ field.label }}
+                        </label>
+                        
+                        {% if field.field.widget.input_type == 'select' %}
+                            <select name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-select text-dark small py-2 {% if field.errors %}is-invalid{% endif %}">
+                                {% for value, text in field.field.choices %}
+                                    <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ text }}</option>
+                                {% endfor %}
+                            </select>
+                        {% else %}
+                            <input type="{{ field.field.widget.input_type|default:'text' }}" 
+                                   name="{{ field.name }}" 
+                                   id="{{ field.id_for_label }}" 
+                                   value="{{ field.value|default:'' }}" 
+                                   class="form-control text-dark small py-2 {% if field.errors %}is-invalid{% endif %}" 
+                                   {% if field.field.required %}required{% endif %}>
+                        {% endif %}
+                        
+                        {% if field.help_text %}
+                            <div class="form-text text-muted xsmall lh-sm px-1">{{ field.help_text|safe }}</div>
+                        {% endif %}
+                        
+                        {% if field.errors %}
+                            <div class="text-danger small fw-medium px-1 mt-0.5">{{ field.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
 
-            <div class="pt-3">
-                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition shadow-sm">
+            <div>
+                <button type="submit" class="btn btn-primary w-100 py-2.5 fw-bold shadow-sm small">
                     Зарегистрировать и войти
                 </button>
             </div>
         </form>
         
-        <div class="text-center pt-2 border-t border-gray-100">
-            <p class="text-xs text-gray-500">
+        <div class="text-center pt-3 mt-4 border-top">
+            <p class="xsmall text-muted m-0">
                 Сотрудник уже зарегистрирован? 
-                <a href="{% url 'users:login' %}" class="font-bold text-indigo-600 hover:text-indigo-500 transition underline">
+                <a href="{% url 'users:login' %}" class="fw-bold text-primary text-decoration-underline ms-1">
                     Войти в систему
                 </a>
             </p>

@@ -3,54 +3,46 @@
 {% block title %}Панель управления — {{ user.username }}{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="container-fluid max-width-container py-4 dashboard-wrapper">
     
-    <!-- КЛЮЧЕВОЙ БЛОК: Приветствие и личная карточка -->
-    <div class="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl shadow-xl p-6 text-white mb-8 flex flex-col md:flex-row justify-between items-center">
-        <div class="mb-4 md:mb-0">
-            <h1 class="text-3xl font-extrabold tracking-tight">Приветствуем, {{ user.username }}!</h1>
-            <p class="text-indigo-100 mt-2 text-lg">
-                Вы вошли как <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-bold">{{ role }}</span> 
-                в отделе <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-bold">{{ department }}</span>
-            </p>
-        </div>
-        <div class="flex space-x-3">
-            <a href="{% url 'users:profile' %}" class="bg-white text-indigo-600 px-5 py-2.5 rounded-xl font-semibold hover:bg-indigo-50 transition shadow-md text-sm">
-                Мой профиль
-            </a>
-            <a href="{% url 'tasks:task_list' %}" class="bg-indigo-500/50 text-white border border-indigo-400 px-5 py-2.5 rounded-xl font-semibold hover:bg-indigo-500 transition text-sm">
-                К задачам
-            </a>
+    <div class="card main-welcome-banner border-0 p-4 mb-4 text-start shadow-sm">
+        <div class="row align-items-center g-3">
+            <div class="col-12 col-md">
+                <h1 class="h3 m-0 fw-bold tracking-tight text-white">Приветствуем, {{ user.username }}!</h1>
+                <p class="m-0 mt-2 text-white-50 small">
+                    Вы вошли как <span class="badge banner-role-badge px-2 py-1 font-monospace fw-bold">{{ role }}</span> 
+                    в отделе <span class="badge banner-role-badge px-2 py-1 font-monospace fw-bold">{{ department }}</span>
+                </p>
+            </div>
+            <div class="col-12 col-md-auto d-flex gap-2">
+                <a href="{% url 'users:profile' %}" class="btn btn-sm btn-light banner-btn px-3">
+                    Мой профиль
+                </a>
+                <a href="{% url 'tasks:task_list' %}" class="btn btn-sm btn-outline-light banner-btn px-3">
+                    К задачам
+                </a>
+            </div>
         </div>
     </div>
 
-    <!-- РАЗВЕТВЛЕНИЕ ПО РОЛЯМ -->
-
     {% if profile.role == 'admin' %}
-    <!-- ==================== ИНТЕРФЕЙС АДМИНИСТРАТОРА ==================== -->
-    <div class="space-y-6">
-        <h2 class="text-xl font-bold text-gray-900 flex items-center">
-            <span class="w-2 h-6 bg-red-600 rounded-full mr-2"></span> Панель системного администратора
-        </h2>
+    <!-- Админ-->
+    <div class="d-flex flex-column gap-3 text-start animate-fade-in">
+        <div class="border-start border-slate border-4 ps-3 py-1 mb-1">
+            <h2 class="h5 text-dark m-0 fw-bold">Панель системного администратора</h2>
+        </div>
         
-        <!-- Сетка метрик -->
-
-        <!-- Быстрые действия админа -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Глобальные действия</h3>
-            <div class="flex flex-wrap gap-4">
-                <a href="/admin/" target="_blank" class="px-5 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition font-medium text-sm">
-                    Django Admin 🛠️
+        <div class="card custom-dashboard-card p-4 shadow-sm">
+            <h3 class="h6 text-secondary fw-bold mb-3 uppercase-tracking">Глобальные действия</h3>
+            <div class="d-flex flex-wrap gap-2 button-action-group">
+                <a href="/admin/" target="_blank" class="btn btn-sm btn-custom-primary font-monospace">
+                    Django Admin
                 </a>
-                <a href="{% url 'tasks:task_list' %}" class="px-5 py-3 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition font-medium text-sm">
+                <a href="{% url 'tasks:task_list' %}" class="btn btn-sm btn-custom-secondary">
                     Аудит задач
                 </a>
-                <!-- ✅ НОВЫЕ ССЫЛКИ НА АНАЛИТИКУ -->
-                <a href="{% url 'analytics:admin_analytics' %}" class="px-5 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition font-medium text-sm shadow-sm">
-                    📊 Панель аналитики
-                </a>
-                <a href="{% url 'analytics:all_departments' %}" class="px-5 py-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition font-medium text-sm border border-blue-200">
-                    🏢 Отчёты по отделам
+                <a href="{% url 'analytics:admin_analytics' %}" class="btn btn-sm btn-custom-secondary">
+                    Панель аналитики
                 </a>
             </div>
         </div>
@@ -58,57 +50,60 @@
 
 
     {% elif profile.role == 'team_lead' %}
-    <!-- ==================== ИНТЕРФЕЙС РУКОВОДИТЕЛЯ (TEAM LEAD) ==================== -->
-    <div class="space-y-6">
-        <h2 class="text-xl font-bold text-gray-900 flex items-center">
-            <span class="w-2 h-6 bg-purple-600 rounded-full mr-2"></span> Рабочее пространство тимлида
-        </h2>
+    <!-- Руководитель команды -->
+    <div class="d-flex flex-column gap-3 text-start animate-fade-in">
+        <div class="border-start border-slate border-4 ps-3 py-1 mb-1">
+            <h2 class="h5 text-dark m-0 fw-bold">Рабочее пространство тимлида</h2>
+        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Блок слева: Статистика отдела -->
-            <div class="lg:col-span-2 space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">Эффективность отдела: {{ department }}</h3>
-                    <p class="text-sm text-gray-500 mb-4">Вы видите операционную деятельность исключительно подчиненных вашей структуры.</p>
-                    <div class="p-4 bg-purple-50 text-purple-700 rounded-xl text-sm font-medium">
-                        ℹ️ Все создаваемые вами задачи автоматически будут распределяться внутри отдела <strong>{{ department }}</strong>.
+        <div class="row g-4">
+            <div class="col-12 col-lg-8 d-flex flex-column gap-4">
+                <div class="card custom-dashboard-card p-4 shadow-sm">
+                    <h3 class="h6 text-dark fw-bold mb-2">Эффективность отдела: {{ department }}</h3>
+                    <p class="small text-muted mb-3">Вы видите операционную деятельность исключительно подчиненных вашей структуры.</p>
+                    <div class="alert alert-custom-info border-0 small mb-0 py-2 px-3 font-monospace">
+                        Все создаваемые вами задачи автоматически будут распределяться внутри отдела <strong>{{ department }}</strong>.
                     </div>
                 </div>
 
                 <!-- Управление командой -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-bold text-gray-800">Оперативные действия</h3>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <a href="{% url 'tasks:task_list' %}" class="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition border border-gray-200/50 block">
-                            <span class="block font-bold text-gray-800 text-sm">Контроль трекера 📋</span>
-                            <span class="text-xs text-gray-500 mt-1 block">Проверить статусы выполнения задач вашего отдела.</span>
-                        </a>
-                        <div class="p-4 bg-gray-50 rounded-xl border border-gray-200/50 opacity-60">
-                            <span class="block font-bold text-gray-800 text-sm">Нагрузка команды (В разработке)</span>
-                            <span class="text-xs text-gray-500 mt-1 block">Диаграмма распределения задач между сотрудниками.</span>
+                <div class="card custom-dashboard-card p-4 shadow-sm">
+                    <h3 class="h6 text-secondary fw-bold mb-3 uppercase-tracking">Оперативные действия</h3>
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6">
+                            <a href="{% url 'tasks:task_list' %}" class="card h-100 bg-action-block p-3 text-decoration-none dashboard-action-card">
+                                <span class="d-block fw-bold text-dark small mb-1">Контроль трекера</span>
+                                <span class="text-muted small-text">Проверить статусы выполнения задач вашего отдела.</span>
+                            </a>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="card h-100 bg-action-block p-3 opacity-50 border-dashed">
+                                <span class="d-block fw-bold text-secondary small mb-1">Нагрузка команды (В разработке)</span>
+                                <span class="text-muted small-text">Диаграмма распределения задач между сотрудниками.</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Блок справа: Инфо-виджет -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
-                <div>
-                    <h3 class="text-lg font-bold text-gray-800 mb-3">Памятка руководителя</h3>
-                    <ul class="text-sm text-gray-600 space-y-3">
-                        <li class="flex items-start">
-                            <span class="text-purple-600 mr-2">✔</span> Контролируйте дедлайны сотрудников.
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-purple-600 mr-2">✔</span> Оставляйте комментарии в карточках задач для корректировки требований.
-                        </li>
-                    </ul>
-                </div>
-                <div class="mt-6 pt-4 border-t border-gray-100">
-                    <span class="text-xs text-gray-400 block">Уровень доступов:</span>
-                    <span class="text-sm font-bold text-gray-700">Просмотр ветки отдела ({{ profile.department|upper }})</span>
+            <div class="col-12 col-lg-4">
+                <div class="card h-100 custom-dashboard-card p-4 shadow-sm d-flex flex-column justify-content-between">
+                    <div>
+                        <h3 class="h6 text-dark fw-bold mb-3">Памятка руководителя</h3>
+                        <ul class="list-unstyled small text-secondary d-flex flex-column gap-2 mb-0">
+                            <li class="d-flex align-items-start">
+                                <span class="text-slate fw-bold me-2">&bull;</span> Контролируйте дедлайны сотрудников.
+                            </li>
+                            <li class="d-flex align-items-start">
+                                <span class="text-slate fw-bold me-2">&bull;</span> Оставляйте комментарии в карточках задач для корректировки требований.
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="mt-4 pt-3 border-top border-light-subtle">
+                        <span class="text-muted small-text d-block">Уровень доступов:</span>
+                        <span class="small fw-bold text-dark font-monospace">Просмотр ветки отдела ({{ profile.department|upper }})</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -116,43 +111,43 @@
 
 
     {% else %}
-    <!-- ==================== ИНТЕРФЕЙС ОБЫЧНОГО СОТРУДНИКА ==================== -->
-    <div class="space-y-6">
-        <h2 class="text-xl font-bold text-gray-900 flex items-center">
-            <span class="w-2 h-6 bg-blue-600 rounded-full mr-2"></span> Мое рабочее место
-        </h2>
+    <!-- сотрудник -->
+    <div class="d-flex flex-column gap-3 text-start animate-fade-in">
+        <div class="border-start border-slate border-4 ps-3 py-1 mb-1">
+            <h2 class="h5 text-dark m-0 fw-bold">Мое рабочее место</h2>
+        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Карточка: Мои задачи -->
-            <div class="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h3 class="text-lg font-bold text-gray-800 mb-2">Фокус на сегодня</h3>
-                <p class="text-sm text-gray-500 mb-6">Здесь отображается быстрый доступ к вашему персональному спринту.</p>
-                
-                <div class="space-y-3">
-                    <a href="{% url 'tasks:task_list' %}" class="flex items-center justify-between p-4 bg-indigo-50/50 hover:bg-indigo-50 rounded-xl transition text-indigo-700 font-medium text-sm">
-                        <span>Перейти к выполнению личных задач</span>
-                        <span>Перейти →</span>
+        <div class="row g-4">
+            <div class="col-12 col-md-8">
+                <div class="card h-100 custom-dashboard-card p-4 shadow-sm">
+                    <h3 class="h6 text-dark fw-bold mb-2">Фокус на сегодня</h3>
+                    <p class="small text-muted mb-4">Здесь отображается быстрый доступ к вашему персональному спринту.</p>
+                    
+                    <a href="{% url 'tasks:task_list' %}" class="btn btn-sm btn-custom-outline d-flex align-items-center justify-content-between p-2 px-3 text-start">
+                        <span class="small fw-semibold">Перейти к выполнению личных задач</span>
+                        <span class="font-monospace">&rarr;</span>
                     </a>
                 </div>
             </div>
 
-            <!-- Карточка: Статус аккаунта -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
-                <div>
-                    <h3 class="text-lg font-bold text-gray-800 mb-3">Ваш статус</h3>
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Учетная запись:</span>
-                            <span class="text-green-600 font-semibold">Активна</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Права на смену статусов:</span>
-                            <span class="text-gray-700 font-medium">Разрешены</span>
+            <div class="col-12 col-md-4">
+                <div class="card h-100 custom-dashboard-card p-4 shadow-sm d-flex flex-column justify-content-between">
+                    <div>
+                        <h3 class="h6 text-dark fw-bold mb-3">Ваш статус</h3>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="d-flex justify-content-between small">
+                                <span class="text-muted">Учетная запись:</span>
+                                <span class="text-success fw-bold font-monospace">Активна</span>
+                            </div>
+                            <div class="d-flex justify-content-between small">
+                                <span class="text-muted">Смена статусов:</span>
+                                <span class="text-dark fw-medium">Разрешена</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="mt-6 text-xs text-gray-400 border-t pt-3">
-                    Если вы не видите задачу, обратитесь к вашему Тимлиду.
+                    <div class="mt-4 pt-3 border-top border-light-subtle text-muted small-text">
+                        Если вы не видите задачу, обратитесь к вашему Тимлиду.
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,69 +1,67 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-xl mx-auto mt-10 px-4">
-    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-2xl">
-        
-        <div class="mb-6 border-b border-gray-100 pb-4">
-            <h2 class="text-2xl font-bold text-gray-800 tracking-tight flex items-center gap-2">
-                <span class="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                </span>
-                {{ title }}
-            </h2>
-        </div>
-
-        <form method="post" class="space-y-5">
-            {% csrf_token %}
+<div class="row justify-content-center my-4">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow-sm border border-light-subtle">
             
-            {% if form.non_field_errors %}
-                <div class="p-4 text-sm text-red-700 bg-red-50 rounded-xl border border-red-100" role="alert">
-                    {{ form.non_field_errors }}
-                </div>
-            {% endif %}
-
-            {% for field in form %}
-                <div class="flex flex-col space-y-1.5">
-                    <label for="{{ field.id_for_label }}" class="text-sm font-semibold text-gray-700">
-                        {{ field.label }}
-                        {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
-                    </label>
-                    
-                    <div class="relative rounded-lg shadow-sm">
-                        {{ field }}
-                    </div>
-
-                    {% if field.help_text %}
-                        <p class="text-xs text-gray-400 mt-1">{{ field.help_text }}</p>
-                    {% endif %}
-
-                    {% if field.errors %}
-                        <p class="text-xs text-red-500 font-medium mt-1">{{ field.errors|join:", " }}</p>
-                    {% endif %}
-                </div>
-            {% endfor %}
-            
-            <div class="pt-4 border-t border-gray-50 mt-6">
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 transform active:scale-[0.98] shadow-md shadow-blue-100 flex justify-center items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Создать
-                </button>
+            <!-- Заголовок карточки -->
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                <h2 class="card-title h4 fw-bold text-dark d-flex align-items-center gap-2 m-0">
+                    <span class="p-2 bg-primary-subtle text-primary rounded d-inline-flex">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1.25em" height="1.25em" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </span>
+                    {{ title }}
+                </h2>
             </div>
-        </form>
+
+            <!-- Тело формы -->
+            <div class="card-body p-4">
+                <form method="post" class="needs-validation">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger small py-2 px-3 mb-3" role="alert">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    {% for field in form %}
+                        <div class="mb-3 data-form-group">
+                            <label for="{{ field.id_for_label }}" class="form-label small fw-semibold text-secondary mb-1">
+                                {{ field.label }}
+                                {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            
+                            <div class="position-relative field-container">
+                                {{ field }}
+                            </div>
+
+                            {% if field.help_text %}
+                                <div class="form-text small text-muted mt-1">{{ field.help_text }}</div>
+                            {% endif %}
+
+                            {% if field.errors %}
+                                <div class="invalid-feedback d-block small mt-1">{{ field.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    
+
+                    <div class="pt-3 border-top mt-4">
+                        <button type="submit" class="btn btn-primary w-100 py-2 d-flex justify-content-center align-items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1.15em" height="1.15em" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Создать
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
     </div>
 </div>
-
-<script>
-    document.querySelectorAll('form input, form select, form textarea').forEach(input => {
-        if (input.type !== 'checkbox' && input.type !== 'radio') {
-            input.classList.add('w-full', 'px-4', 'py-2.5', 'bg-gray-50', 'border', 'border-gray-200', 'rounded-xl', 'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500/20', 'focus:border-blue-500', 'transition-all', 'duration-200', 'text-gray-700');
-        } else if (input.type === 'checkbox') {
-            input.classList.add('rounded', 'border-gray-300', 'text-blue-600', 'focus:ring-blue-500');
-        }
-    });
-</script>
 {% endblock %}

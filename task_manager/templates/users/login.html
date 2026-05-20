@@ -3,51 +3,56 @@
 {% block title %}Авторизация в системе{% endblock %}
 
 {% block content %}
-<div class="min-h-[calc(100vh-12rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-6 bg-white p-8 rounded-2xl shadow-xs border border-gray-100">
-        <div>
-            <h2 class="text-center text-2xl font-black text-gray-900 tracking-tight">
+<div class="d-flex align-items-center justify-content-center px-3 py-5" style="min-height: calc(100vh - 12rem);">
+    <div class="card shadow-sm border-0 p-4 w-100 bg-white" style="max-width: 440px; border-radius: 1rem;">
+        
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-dark tracking-tight h4 m-0">
                 Вход в систему
             </h2>
-            <p class="mt-1.5 text-center text-sm text-gray-400 font-medium">
+            <p class="text-muted small m-0 mt-1.5">
                 Введите учетные данные для доступа к корпоративному трекеру задач
             </p>
         </div>
         
-        <form class="space-y-4" method="POST" action="{% url 'users:login' %}">
+        <form method="POST" action="{% url 'users:login' %}">
             {% csrf_token %}
             
             {% if form.errors %}
-                <div class="bg-rose-50 border border-rose-100 text-rose-700 p-3 rounded-xl text-xs font-bold">
+                <div class="alert alert-danger border-0 py-2.5 px-3 rounded mb-3 small fw-medium">
                     Неверное имя пользователя или пароль. Попробуйте снова.
                 </div>
             {% endif %}
 
-            <div class="space-y-1">
-                <label for="id_username" class="block text-xs font-bold text-gray-400 uppercase tracking-wider">
-                    Логин (Username)
-                </label>
-                <input type="text" name="username" id="id_username" required
-                       class="w-full border border-gray-200 rounded-xl p-2.5 text-sm focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-gray-800 font-medium">
+            <div class="d-flex flex-column gap-3 mb-4">
+                
+                <div class="d-flex flex-column gap-1">
+                    <label for="id_username" class="form-label text-uppercase text-muted xsmall fw-bold tracking-wider m-0">
+                        Логин (Username)
+                    </label>
+                    <input type="text" name="username" id="id_username" required
+                           class="form-control text-dark small py-2 {% if form.errors %}is-invalid{% endif %}">
+                </div>
+
+                <div class="d-flex flex-column gap-1">
+                    <label for="id_password" class="form-label text-uppercase text-muted xsmall fw-bold tracking-wider m-0">
+                        Пароль
+                    </label>
+                    <input type="password" name="password" id="id_password" required
+                           class="form-control text-dark small py-2 {% if form.errors %}is-invalid{% endif %}">
+                </div>
+                
             </div>
 
-            <div class="space-y-1">
-                <label for="id_password" class="block text-xs font-bold text-gray-400 uppercase tracking-wider">
-                    Пароль
-                </label>
-                <input type="password" name="password" id="id_password" required
-                       class="w-full border border-gray-200 rounded-xl p-2.5 text-sm focus:outline-hidden focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-gray-800">
-            </div>
-
-            <div class="pt-2">
-                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-black rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition shadow-xs cursor-pointer">
+            <div>
+                <button type="submit" class="btn btn-primary w-100 py-2.5 fw-bold shadow-sm small">
                     Войти в аккаунт
                 </button>
             </div>
         </form>
         
-        <div class="text-center pt-2 border-t border-gray-100">
-            <p class="text-xs text-gray-400 font-medium">
+        <div class="text-center pt-3 mt-4 border-top">
+            <p class="xsmall text-muted lh-base m-0">
                 Доступ только для сотрудников компании.<br>
                 Учётную запись создаёт ваш руководитель.
             </p>

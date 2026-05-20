@@ -1,11 +1,10 @@
-# analytics/views.py
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Q
 from django.utils import timezone
 from tasks.models import Task
-from users.models import UserProfile
+from users.models import UserProfile, Department  # 👈 Импортируем динамическую модель Department
 from datetime import timedelta
 import json
 
@@ -17,18 +16,21 @@ def admin_analytics(request):
 
     now = timezone.now()
 
-    # 🔑 Точные значения из Task.TextChoices
+    # Ключевые статусы и периоды
     STATUS_COMPLETED = Task.StatusChoices.COMPLETED.value
-    STATUS_OVERDUE = Task.StatusChoices.OVERDUE.value
     PERIOD_YEAR = Task.PeriodChoices.YEAR.value
     PERIOD_QUARTER = Task.PeriodChoices.QUARTER.value
     PERIOD_MONTH = Task.PeriodChoices.MONTH.value
     PERIOD_WEEK = Task.PeriodChoices.WEEK.value
 
-    # === 1. Аналитика по отделам ===
+    # === 1. Динамическая аналитика по отделам из БД ===
     departments_stats = []
-    for dept_code, dept_name in Task.DepartmentChoices.choices:
-        dept_tasks = Task.objects.filter(department=dept_code)
+    # Запрашиваем все отделы, существующие в базе данных
+    db_departments = Department.objects.all()
+
+    for dept in db_departments:
+        # Фильтруем задачи, относящиеся к данному отделу (через ForeignKey связь в модели Task)
+        dept_tasks = Task.objects.filter(department=dept)
         total = dept_tasks.count()
         completed = dept_tasks.filter(status=STATUS_COMPLETED).count()
         overdue = dept_tasks.filter(
@@ -36,9 +38,9 @@ def admin_analytics(request):
         ).count()
 
         departments_stats.append({
-            'code': dept_code,
-            'name': dept_name,
-            'users': UserProfile.objects.filter(department__iexact=dept_code).count(),
+            'id': dept.id,               # 👈 ID для генерации корректных URL-адресов
+            'name': dept.name,           # Название из БД (например, "ИТ", "HR")
+            'users': UserProfile.objects.filter(department=dept).count(), # Кол-во людей в отделе
             'total': total,
             'completed': completed,
             'overdue': overdue,
@@ -69,13 +71,14 @@ def admin_analytics(request):
         }
 
     # === 3. Просроченные задачи ===
+    # Оптимизируем запросы, подгружая и исполнителя, и его отдел
     overdue_tasks = Task.objects.filter(
         Q(deadline__lt=now) & ~Q(status=STATUS_COMPLETED)
-    ).select_related('assignee__profile').order_by('deadline')[:20]
+    ).select_related('assignee__profile__department', 'parent_task')
 
     # === 4. Загрузка сотрудников ===
     employee_stats = []
-    for up in UserProfile.objects.select_related('user'):
+    for up in UserProfile.objects.select_related('user', 'department'):
         user_tasks = Task.objects.filter(assignee=up.user)
         total = user_tasks.count()
         if total > 0:
@@ -88,7 +91,7 @@ def admin_analytics(request):
             employee_stats.append({
                 'username': up.user.username,
                 'full_name': up.user.get_full_name() or up.user.username,
-                'department': up.get_department_display(),
+                'department': up.department.name if up.department else "Не указан",
                 'total': total,
                 'active': active,
                 'completed': completed,
@@ -116,6 +119,10 @@ def admin_analytics(request):
 
 @login_required
 def department_report(request, department_code=None):
+    """
+    department_code теперь принимает ID (int) записи из таблицы Department 
+    или None для отображения 'Все отделы'
+    """
     profile = getattr(request.user, 'profile', None)
     if not profile or profile.role != 'admin':
         raise PermissionDenied("Доступ только для администраторов")
@@ -123,18 +130,18 @@ def department_report(request, department_code=None):
     now = timezone.now()
     STATUS_COMPLETED = Task.StatusChoices.COMPLETED.value
 
-    # 🔧 Исправление регистра отдела
     if department_code:
-        dept_code_upper = department_code.upper()
-        tasks = Task.objects.filter(department__iexact=dept_code_upper).select_related('assignee__profile')
-        department_name = dict(Task.DepartmentChoices.choices).get(dept_code_upper, department_code)
+        # Извлекаем отдел по ID, защищая от несуществующих значений
+        current_dept = get_object_or_404(Department, id=department_code)
+        tasks = Task.objects.filter(department=current_dept).select_related('assignee__profile')
+        department_name = current_dept.name
     else:
         tasks = Task.objects.all().select_related('assignee__profile')
         department_name = 'Все отделы'
 
     total = tasks.count()
 
-    # ✅ Подсчёт по статусам (передаём в шаблон)
+    # Подсчёт по статусам
     status_counts = {
         'new': tasks.filter(status=Task.StatusChoices.NEW.value).count(),
         'in_progress': tasks.filter(status=Task.StatusChoices.IN_PROGRESS.value).count(),
@@ -143,7 +150,6 @@ def department_report(request, department_code=None):
         'overdue': tasks.filter(Q(deadline__lt=now) & ~Q(status=STATUS_COMPLETED)).count(),
     }
 
-    # ✅ Подсчёт по периодам (передаём в шаблон)
     period_counts = {
         'year': tasks.filter(period=Task.PeriodChoices.YEAR.value).count(),
         'quarter': tasks.filter(period=Task.PeriodChoices.QUARTER.value).count(),
@@ -156,7 +162,7 @@ def department_report(request, department_code=None):
         'department_name': department_name,
         'department_code': department_code,
         'status_counts': status_counts,
-        'period_counts': period_counts,  # ✅ Добавляем в контекст
+        'period_counts': period_counts,
         'total': total,
         'now': now,
     }

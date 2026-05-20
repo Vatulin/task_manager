@@ -3,25 +3,28 @@
 {% block title %}{{ task.title }} — Детали задачи{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-6">
-    <div class="mb-4">
-        <a href="{% url 'tasks:task_list' %}" class="text-sm text-indigo-600 hover:underline">← Назад к списку задач</a>
+<div class="container-fluid max-width-container">
+    
+    <div class="mb-3 text-start">
+        <a href="{% url 'tasks:task_list' %}" class="btn btn-link btn-sm text-secondary text-decoration-none p-0 task-back-btn">
+            &larr; Назад к списку задач
+        </a>
     </div>
 
-    <div class="bg-white shadow rounded-lg p-6 mb-6">
-        <div class="flex justify-between items-start border-b border-gray-200 pb-4 mb-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">{{ task.title }}</h1>
-                <p class="text-sm text-gray-500 mt-1">
-                    Создана: {{ task.created_at|date:"d.m.Y H:i" }} | Период: {{ task.get_period_display }}
+    <div class="card bg-white border border-light-subtle dashboard-card p-4 mb-4 text-start">
+        
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start pb-3 mb-4 border-bottom">
+            <div class="mb-3 mb-md-0">
+                <h1 class="h3 text-dark mb-1fw-bold">{{ task.title }}</h1>
+                <p class="text-muted small m-0">
+                    Создана: {{ task.created_at|date:"d.m.Y H:i" }} <span class="mx-1 text-black-50">|</span> Период: {{ task.get_period_display }}
                 </p>
             </div>
             
-            <form method="POST" class="flex items-center space-x-2">
+            <form method="POST" id="statusChangeForm" class="d-flex align-items-center gap-2">
                 {% csrf_token %}
-                <label for="status" class="text-sm font-medium text-gray-700">Статус:</label>
-                <select name="status" id="status" onchange="this.form.submit()" 
-                        class="rounded-md border-gray-300 shadow-sm text-sm bg-blue-50 text-blue-900 font-semibold focus:border-indigo-500 focus:ring-indigo-500 cursor-pointer">
+                <label for="id_status_select" class="small fw-semibold text-secondary text-nowrap m-0">Статус:</label>
+                <select name="status" id="id_status_select" class="form-select form-select-sm status-select-control fw-semibold">
                     {% for value, label in status_choices %}
                         <option value="{{ value }}" {% if task.status == value %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
@@ -29,78 +32,82 @@
             </form>
         </div>
 
-        <div class="bg-white shadow-sm rounded-xl p-6 mb-6 border border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900 mb-3">Описание задачи</h3>
-            <div class="text-gray-700 leading-relaxed text-sm md:text-base">
+        <!-- Описание задачи -->
+        <div class="card bg-light border-0 rounded-0 p-3 mb-4">
+            <h3 class="h6 text-uppercase tracking-wider text-muted fw-bold mb-2 task-section-title">Описание задачи</h3>
+            <div class="text-dark small lh-base">
                 {% if task.description %}
                     {{ task.description|linebreaks }}
                 {% else %}
-                    <span class="text-gray-400 italic">Описание к этой задаче не добавлено.</span>
+                    <span class="text-muted italic">Описание к этой задаче не добавлено.</span>
                 {% endif %}
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
-            <div>
-                <span class="font-semibold block text-gray-500 uppercase text-xs">Приоритет:</span>
-                <span class="inline-block mt-1 px-2 py-1 rounded text-xs font-bold {% if task.priority == 'HIGH' %}bg-red-100 text-red-800{% elif task.priority == 'MEDIUM' %}bg-yellow-100 text-yellow-800{% else %}bg-green-100 text-green-800{% endif %}">
+        <!-- Сетка параметров -->
+        <div class="row g-3 text-start">
+            <div class="col-12 col-md-4">
+                <span class="d-block text-uppercase text-muted fw-bold task-meta-label">Приоритет:</span>
+                <span class="task-priority-marker small fw-bold text-uppercase border-bottom border-2 px-1 {% if task.priority == 'HIGH' %}border-danger text-danger{% elif task.priority == 'MEDIUM' %}border-warning text-warning{% else %}border-success text-success{% endif %}">
                     {{ task.get_priority_display }}
                 </span>
             </div>
-            <div>
-                <span class="font-semibold block text-gray-500 uppercase text-xs">Исполнитель:</span>
+            <div class="col-12 col-md-4">
+                <span class="d-block text-uppercase text-muted fw-bold task-meta-label">Исполнитель:</span>
                 {% if task.assignee %}
-                    <a href="{% url 'users:profile' task.assignee.id %}" class="mt-1 inline-block font-semibold text-indigo-600 hover:text-indigo-700 hover:underline transition">
+                    <a href="{% url 'users:profile' task.assignee.id %}" class="task-assignee-link text-dark text-decoration-none fw-semibold small">
                         {{ task.assignee.get_full_name|default:task.assignee.username }}
                     </a>
                 {% else %}
-                    <p class="mt-1 font-medium text-gray-400 italic">Не назначен</p>
+                    <span class="text-muted small italic">Не назначен</span>
                 {% endif %}
             </div>
-            <div>
-                <span class="font-semibold block text-gray-500 uppercase text-xs">Дедлайн:</span>
-                <p class="mt-1 text-red-600 font-medium">{{ task.deadline|date:"d.m.Y H:i" }}</p>
+            <div class="col-12 col-md-4">
+                <span class="d-block text-uppercase text-muted fw-bold task-meta-label">Дедлайн:</span>
+                <span class="text-danger fw-semibold small">{{ task.deadline|date:"d.m.Y H:i" }}</span>
             </div>
         </div>
     </div>
 
-    <div class="bg-white shadow rounded-lg p-6">
-        <h2 class="text-lg font-bold text-gray-900 mb-4">Обсуждение задачи</h2>
+    <!-- Обсуждение / Комментарии -->
+    <div class="card bg-white border border-light-subtle dashboard-card p-4 text-start">
+        <h2 class="h5 text-dark fw-bold mb-3">Обсуждение задачи</h2>
 
         {% if user.is_authenticated %}
-        <form action="{% url 'tasks:add_comment' task.id %}" method="POST" class="mb-6">
+        <form action="{% url 'tasks:add_comment' task.id %}" method="POST" class="mb-4">
             {% csrf_token %}
-            <div>
+            <div class="mb-2">
                 <textarea name="content" rows="3" required
                           placeholder="Напишите, как продвигаются дела по задаче..." 
-                          class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 border"
+                          class="form-control form-control-sm rounded-0 text-sm p-2"
                 ></textarea>
             </div>
-            <div class="mt-2 text-right">
-                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none">
+            <div class="text-end">
+                <button type="submit" class="btn btn-sm btn-primary">
                     Отправить комментарий
                 </button>
             </div>
         </form>
         {% else %}
-        <p class="text-sm text-gray-500 italic mb-4">Только авторизованные пользователи могут оставлять комментарии.</p>
+            <p class="small text-muted italic mb-3">Только авторизованные пользователи могут оставлять комментарии.</p>
         {% endif %}
 
-        <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
+        <!-- Список комментариев -->
+        <div class="comments-container d-flex flex-column gap-3 overflow-y-auto pe-1">
             {% for comment in comments %}
-            <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                <div class="flex justify-between items-center mb-1">
-                    <a href="{% url 'users:profile' comment.author.id %}" class="font-semibold text-sm text-indigo-600 hover:text-indigo-700 hover:underline transition">
+            <div class="comment-item p-3 bg-light border-start border-secondary border-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <a href="{% url 'users:profile' comment.author.id %}" class="task-assignee-link text-primary text-decoration-none fw-bold small">
                         {{ comment.author.username }}
                     </a>
-                    <span class="text-xs text-gray-400">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
+                    <span class="text-muted comment-date-text">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
                 </div>
-                <p class="text-sm text-gray-700 whitespace-pre-line">
+                <p class="m-0 text-dark small text-break whitespace-pre-line">
                     {{ comment.text }}{{ comment.body }}{{ comment.content }}
                 </p>
             </div>
             {% empty %}
-            <p class="text-sm text-gray-400 text-center py-4">Здесь пока нет ни одного комментария. Будьте первым!</p>
+                <p class="small text-muted text-center py-3 m-0">Здесь пока нет ни одного комментария.</p>
             {% endfor %}
         </div>
     </div>

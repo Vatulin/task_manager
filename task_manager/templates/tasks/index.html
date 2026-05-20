@@ -3,24 +3,40 @@
 {% block title %}Главная — Панель управления{% endblock %}
 
 {% block content %}
-<div class="px-4 py-6 sm:px-0">
-    <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Добро пожаловать в Task Manager!</h1>
-        <p class="text-gray-600 mt-1">Оперативное управление целями компании с возможностью мгновенного обновления.</p>
+<div class="container-fluid max-width-container">
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h2 text-dark mb-1">Панель управления</h1>
+            <p class="text-muted small">Оперативное управление целями и задачами организации в закрытом контуре.</p>
+        </div>
     </div>
 
-    <div class="bg-white shadow rounded-lg p-6">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Последние задачи проекта</h2>
-        
-        {% if recent_tasks %}
-            <div class="space-y-4">
-                {% for task in recent_tasks %}
-                    {% include 'tasks/task_item.html' %}
-                {% endfor %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-white border border-light-subtle dashboard-card">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h2 class="h5 text-dark m-0 fw-semibold">Последние задачи проекта</h2>
+                </div>
+                <div class="card-body p-4">
+                    {% if recent_tasks %}
+                        <div class="task-list-wrapper">
+                            {% for task in recent_tasks %}
+                                {% include 'tasks/task_item.html' %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <p class="text-muted mb-3">Задачи в системе отсутствуют.</p>
+                            <a href="/admin/tasks/task/add/" class="btn btn-sm btn-primary">
+                                Добавить задачу
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
-        {% else %}
-            <p class="text-gray-500 py-4">Задач пока нет. Вы можете добавить их через <a href="/admin/tasks/task/add/" class="text-indigo-600 hover:underline">админ-панель</a>.</p>
-        {% endif %}
+        </div>
     </div>
+
 </div>
 {% endblock %}
