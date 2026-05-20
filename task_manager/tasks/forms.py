@@ -1,4 +1,3 @@
-# tasks/forms.py
 from django import forms
 from .models import Task
 
@@ -7,16 +6,14 @@ class TaskForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         
-        # 🔧 Делаем department необязательным в форме
-        self.fields['department'].required = False
-        
         if self.user and hasattr(self.user, 'profile'):
             user_profile = self.user.profile
             
-            # 🔹 team_lead: отдел фиксируется и скрывается
+            # 🔹 Если это team_lead — полностью убираем поле из формы,
+            # чтобы Django вообще не пытался его валидировать в POST-запросе
             if user_profile.role == 'team_lead':
-                self.fields['department'].initial = user_profile.department
-                self.fields['department'].widget = forms.HiddenInput()
+                if 'department' in self.fields:
+                    del self.fields['department']
             
             # 🔹 Фильтруем исполнителей
             if user_profile.role == 'admin':
@@ -42,12 +39,13 @@ class TaskForm(forms.ModelForm):
                 field.widget.attrs.update({'class': input_classes})
 
     def save(self, commit=True):
-        """Переопределяем save, чтобы автоматически проставить отдел, если он не указан"""
         task = super().save(commit=False)
         
-        # 🔧 Если отдел не указан — берём из профиля создающего пользователя
-        if not task.department and self.user and hasattr(self.user, 'profile'):
-            task.department = self.user.profile.department
+        # Подстраховка: если у задачи нет отдела (например, создавал team_lead),
+        # автоматически берем отдел из профиля создателя
+        if not hasattr(task, 'department') or not task.department:
+            if self.user and hasattr(self.user, 'profile'):
+                task.department = self.user.profile.department
         
         if commit:
             task.save()

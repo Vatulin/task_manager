@@ -41,8 +41,6 @@ INSTALLED_APPS = [
     'tasks.apps.TasksConfig',
     'analytics.apps.AnalyticsConfig',
     'ai_assistant.apps.AiAssistantConfig'
-
-
 ]
 
 MIDDLEWARE = [

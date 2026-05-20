@@ -6,28 +6,25 @@
 {% block content %}
 <div class="py-2">
 
-    <!-- Заголовок страницы -->
     <div class="mb-4">
         <h1 class="h3 fw-bold text-dark">Аналитика системы</h1>
         <p class="text-muted small mt-1">Мониторинг выполнения планов по отделам и периодам</p>
     </div>
 
-    <!-- Панель быстрых отчётов -->
     <div class="mb-4 p-3 bg-light rounded border">
         <h6 class="text-uppercase tracking-wider text-secondary fw-bold mb-2">Доступные отчёты</h6>
         <div class="d-flex flex-wrap gap-2">
             <a href="{% url 'analytics:all_departments' %}" class="btn btn-sm btn-outline-primary fw-medium">
                 Все отделы
             </a>
-            {% for dept_code, dept_name in user.profile.DEPARTMENT_CHOICES %}
-            <a href="{% url 'analytics:department_report' dept_code %}" class="btn btn-sm btn-outline-secondary fw-medium">
-                {{ dept_name }}
+            {% for dept in departments_stats %}
+            <a href="{% url 'analytics:department_report' dept.id %}" class="btn btn-sm btn-outline-secondary fw-medium">
+                {{ dept.name }}
             </a>
             {% endfor %}
         </div>
     </div>
 
-    <!-- Верхние суммарные метрики -->
     <div class="row g-3 mb-4">
         <div class="col-12 col-sm-6 col-md-3">
             <div class="card shadow-sm border-0 p-3 h-100 bg-white">
@@ -55,7 +52,6 @@
         </div>
     </div>
 
-    <!-- Выполнение планов по периодам -->
     <div class="card shadow-sm border-0 p-4 mb-4 bg-white">
         <h5 class="fw-bold text-dark mb-3">Выполнение планов</h5>
         <div class="row g-3">
@@ -80,7 +76,6 @@
         </div>
     </div>
 
-    <!-- Таблица аналитики по отделам -->
     <div class="card shadow-sm border-0 p-4 mb-4 bg-white">
         <h5 class="fw-bold text-dark mb-3">По отделам</h5>
         <div class="table-responsive">
@@ -104,7 +99,7 @@
                         <td class="py-3 text-success fw-semibold">{{ dept.completed }}</td>
                         <td class="py-3 text-danger fw-semibold">{{ dept.overdue }}</td>
                         <td class="py-3 text-end pe-0">
-                            <a href="{% url 'analytics:department_report' dept.code %}" class="btn btn-sm btn-link text-primary text-decoration-none p-0 fw-medium">
+                            <a href="{% url 'analytics:department_report' dept.id %}" class="btn btn-sm btn-link text-primary text-decoration-none p-0 fw-medium">
                                 Детали
                             </a>
                         </td>
@@ -115,7 +110,6 @@
         </div>
     </div>
 
-    <!-- Панель внимания (Просроченные задачи) -->
     {% if overdue_tasks %}
     <div class="card shadow-sm border-0 p-4 mb-4 border-start border-danger border-4 bg-danger-light">
         <h5 class="fw-bold text-danger mb-3">Требуют внимания (просрочено)</h5>
@@ -125,7 +119,9 @@
                 <div>
                     <p class="fw-bold text-dark m-0 small">{{ task.title }}</p>
                     <p class="text-muted xsmall m-0 mt-1">
-                        {{ task.assignee.username }} &bull; {{ task.department|upper }} &bull; Дедлайн: {{ task.deadline|date:"d.m.Y" }}
+                        {{ task.assignee.username }} &bull; 
+                        {% if task.department %}{{ task.department.name }}{% else %}Без отдела{% endif %} &bull; 
+                        Дедлайн: {{ task.deadline|date:"d.m.Y" }}
                     </p>
                 </div>
                 <a href="{% url 'tasks:task_detail' task.id %}" class="btn btn-sm btn-outline-danger fw-medium">
@@ -137,13 +133,10 @@
     </div>
     {% endif %}
 
-    <!-- Блок графиков и загрузки сотрудников -->
     <div class="card shadow-sm border-0 p-4 mb-4 bg-white">
         <h5 class="fw-bold text-dark mb-3">Загрузка сотрудников</h5>
         
-        <!-- Область отрисовки графика -->
         <div class="mb-4 position-relative style-chart-wrapper">
-            <!-- Данные передаются безопасно через HTML5 data-атрибуты, исключая inline JS -->
             <canvas id="employeeChart" 
                     data-labels="{{ employee_labels_json }}" 
                     data-active="{{ employee_active_json }}" 
@@ -152,7 +145,6 @@
                     height="100"></canvas>
         </div>
         
-        <!-- Кастомная строгая легенда -->
         <div class="d-flex flex-wrap gap-4 mb-4 small text-secondary border-bottom pb-3">
             <div class="d-flex align-items-center">
                 <span class="chart-legend-box bg-primary me-2"></span>
@@ -168,7 +160,6 @@
             </div>
         </div>
         
-        <!-- Детализация в раскрывающемся списке -->
         {% if employee_stats %}
         <details class="custom-details small">
             <summary class="text-primary fw-medium cursor-pointer mb-3 user-select-none">
@@ -214,7 +205,6 @@
 
 </div>
 
-<!-- Локальные скрипты из статического хранилища -->
 <script src="{% static 'js/chart.min.js' %}"></script>
 <script src="{% static 'js/analytics.js' %}"></script>
 {% endblock %}

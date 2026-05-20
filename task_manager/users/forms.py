@@ -1,15 +1,20 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import UserProfile
+from .models import UserProfile, Department
+from tasks.models import Task
 
 class UserRegisterForm(UserCreationForm):
     first_name = forms.CharField(label="Имя", max_length=30, required=True)
     last_name = forms.CharField(label="Фамилия", max_length=30, required=True)
     email = forms.EmailField(label="Электронная почта (Email)", required=True)
     
-    # Подтягиваем выпадающие списки напрямую из констант вашей модели UserProfile
-    department = forms.ChoiceField(label="Отдел организации", choices=UserProfile.DEPARTMENT_CHOICES, required=True)
+    department = forms.ModelChoiceField(
+        queryset=Department.objects.all(),
+        label="Отдел организации",
+        empty_label="Выберите отдел",
+        required=True
+    )
     role = forms.ChoiceField(label="Системная роль", choices=UserProfile.ROLE_CHOICES, required=True)
 
     class Meta(UserCreationForm.Meta):
@@ -35,7 +40,12 @@ class InternalUserCreationForm(UserCreationForm):
     first_name = forms.CharField(label="Имя", max_length=30, required=True)
     last_name = forms.CharField(label="Фамилия", max_length=30, required=True)
     email = forms.EmailField(label="Email", required=True)
-    department = forms.ChoiceField(label="Отдел", choices=UserProfile.DEPARTMENT_CHOICES, required=True)
+    department = forms.ModelChoiceField(
+        queryset=Department.objects.all(),
+        label="Отдел",
+        empty_label="Выберите отдел",
+        required=True
+    )
     role = forms.ChoiceField(label="Роль", choices=UserProfile.ROLE_CHOICES, required=True)
 
     class Meta(UserCreationForm.Meta):

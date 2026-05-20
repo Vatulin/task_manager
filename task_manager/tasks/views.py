@@ -112,17 +112,13 @@ def add_comment(request, task_id):
 
 @login_required
 def create_task(request):
-    user_profile = getattr(request.user, 'profile', None)
-    
-    if not user_profile or user_profile.role != 'team_lead':
-        raise PermissionDenied("Создавать задачи могут только руководители команд.")
-
     if request.method == 'POST':
-        form = TaskForm(request.POST, user=request.user)
-        if form.is_valid():
-            form.save()
+            # Передаем request.user, чтобы метод __init__ в форме отработал корректно
+            form = TaskForm(request.POST, user=request.user)
+            if form.is_valid():
+                form.save()
             return redirect('users:dashboard')
     else:
         form = TaskForm(user=request.user)
-
+        
     return render(request, 'tasks/task_form.html', {'form': form})
