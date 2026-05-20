@@ -8,5 +8,6 @@ urlpatterns = [
     path('users/', include('users.urls', namespace='users')),
     path('accounts/profile/', profile_view, name='user_profile'),
     path('ai/', include('ai_assistant.urls')),
+    path('analytics/', include('analytics.urls', namespace='analytics')),
 ]
 
