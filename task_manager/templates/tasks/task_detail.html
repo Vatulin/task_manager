@@ -24,7 +24,7 @@
             <form method="POST" id="statusChangeForm" class="d-flex align-items-center gap-2">
                 {% csrf_token %}
                 <label for="id_status_select" class="small fw-semibold text-secondary text-nowrap m-0">Статус:</label>
-                <select name="status" id="id_status_select" class="form-select form-select-sm status-select-control fw-semibold">
+                <select name="status" id="id_status_select" class="form-select form-select-sm status-select-control fw-semibold" onchange="this.form.submit()">
                     {% for value, label in status_choices %}
                         <option value="{{ value }}" {% if task.status == value %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}

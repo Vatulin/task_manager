@@ -18,7 +18,7 @@
                 Все отделы
             </a>
             {% for dept in departments_stats %}
-            <a href="{% url 'analytics:department_report' dept.id %}" class="btn btn-sm btn-outline-secondary fw-medium">
+            <a href="{% url 'analytics:department_report' department_code=dept.id %}" class="btn btn-sm btn-outline-secondary fw-medium">
                 {{ dept.name }}
             </a>
             {% endfor %}

@@ -3,7 +3,6 @@
 {% block content %}
 <div class="container-fluid max-width-container">
     
-    <!-- Кнопка возврата -->
     <div class="mb-4">
         <a href="{% url 'users:dashboard' %}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
             <svg class="svg-fixed-16 me-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -13,12 +12,11 @@
         </a>
     </div>
 
-    <!-- Основная карта профиля -->
     <div class="card bg-white border border-light-subtle shadow-sm mb-4">
         <div class="card-body p-4">
             
-            <!-- Шапка профиля -->
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center border-bottom pb-4 mb-4 gap-3">
+            <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between border-bottom pb-4 mb-4 gap-3">
+                
                 <div class="d-flex align-items-center gap-3">
                     <div class="profile-avatar-square d-flex align-items-center justify-content-center text-primary fw-bold bg-light border">
                         {{ profile_user.username|slice:":1"|upper }}
@@ -36,50 +34,43 @@
                     </div>
                 </div>
                 
-                <!-- Метаданные (Отдел и Роль) -->
                 {% if profile %}
-                    <div class="row g-2 eval-meta-grid w-100 w-md-auto">
-                        <!-- Отдел -->
-                        <div class="col-6 col-md-auto">
-                            <div class="border rounded p-2 px-3 bg-light-subtle d-flex align-items-center justify-content-between gap-3">
-                                <div>
-                                    <small class="text-muted d-block text-uppercase tracking-wider font-xs">Отдел</small>
-                                    <span class="fw-semibold text-dark small">{{ profile.get_department_display }}</span>
-                                </div>
-                                <div class="text-primary">
-                                    <svg class="svg-fixed-16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                                    </svg>
-                                </div>
+                    <div class="d-flex gap-2 mt-3 mt-md-0">
+                        <div class="border rounded p-2 px-3 bg-light-subtle d-flex align-items-center justify-content-between gap-3" style="min-width: 140px;">
+                            <div>
+                                <small class="text-muted d-block text-uppercase tracking-wider font-xs">Отдел</small>
+                                <span class="fw-semibold text-dark small">{{ profile.department.name|default:"Без отдела" }}</span>
+                            </div>
+                            <div class="text-primary">
+                                <svg class="svg-fixed-16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
                             </div>
                         </div>
                         
-                        <!-- Роль -->
-                        <div class="col-6 col-md-auto">
-                            <div class="border rounded p-2 px-3 bg-light-subtle d-flex align-items-center justify-content-between gap-3">
-                                <div>
-                                    <small class="text-muted d-block text-uppercase tracking-wider font-xs">Роль</small>
-                                    <div class="mt-1">
-                                        {% if profile.role == 'admin' %}
-                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-1 fw-bold tracking-tight">
-                                                {{ profile.get_role_display }}
-                                            </span>
-                                        {% elif profile.role == 'team_lead' %}
-                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-1 fw-bold tracking-tight">
-                                                {{ profile.get_role_display }}
-                                            </span>
-                                        {% else %}
-                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-1 fw-bold tracking-tight">
-                                                {{ profile.get_role_display }}
-                                            </span>
-                                        {% endif %}
-                                    </div>
+                        <div class="border rounded p-2 px-3 bg-light-subtle d-flex align-items-center justify-content-between gap-3" style="min-width: 140px;">
+                            <div>
+                                <small class="text-muted d-block text-uppercase tracking-wider font-xs">Роль</small>
+                                <div class="mt-1">
+                                    {% if profile.role == 'admin' %}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-1 fw-bold tracking-tight">
+                                            {{ profile.get_role_display }}
+                                        </span>
+                                    {% elif profile.role == 'team_lead' %}
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-1 fw-bold tracking-tight">
+                                            {{ profile.get_role_display }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-1 fw-bold tracking-tight">
+                                            {{ profile.get_role_display }}
+                                        </span>
+                                    {% endif %}
                                 </div>
-                                <div class="text-secondary">
-                                    <svg class="svg-fixed-16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                                    </svg>
-                                </div>
+                            </div>
+                            <div class="text-secondary">
+                                <svg class="svg-fixed-16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
                             </div>
                         </div>
                     </div>
@@ -93,7 +84,6 @@
                 {% endif %}
             </div>
 
-            <!-- ПАНЕЛЬ УПРАВЛЕНИЯ АДМИНИСТРАТОРА / РУКОВОДИТЕЛЯ -->
             {% if can_create_team_lead or can_create_employee or user.profile.role == 'team_lead' %}
                 <div class="bg-light border rounded p-3 mb-4">
                     <div class="d-flex align-items-center mb-3 text-secondary">
@@ -106,7 +96,7 @@
                     <div class="d-flex flex-wrap gap-2">
                         {% if can_create_team_lead %}
                             <a href="{% url 'users:create_team_lead' %}" class="btn btn-sm btn-primary rounded-1">
-                                Добавить руководителя
+                                Добавить руководитель
                             </a>
                         {% endif %}
 
@@ -125,7 +115,6 @@
                 </div>
             {% endif %}
 
-            <!-- РАЗДЕЛ ЗАДАЧ -->
             <div>
                 <h2 class="h5 fw-bold text-dark d-flex align-items-center mb-3">
                     <svg class="svg-fixed-18 me-2 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
