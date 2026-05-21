@@ -8,7 +8,6 @@ def get_db_snapshot() -> str:
     overdue = Task.objects.filter(status__in=["new", "in_progress", "review"], deadline__lt=date.today()).count()
     in_progress = Task.objects.filter(status="in_progress").count()
     
-    # Находим самые горящие задачи (дедлайн <= завтра)
     urgent = Task.objects.filter(
         status__in=["new", "in_progress", "review"], 
         deadline__lte=date.today() + timedelta(days=1)

@@ -19,15 +19,12 @@ class UserRegisterForm(UserCreationForm):
 
     class Meta(UserCreationForm.Meta):
         model = User
-        # Добавляем стандартные поля профиля к базовым полям авторизации
         fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email')
 
     def save(self, commit=True):
-        # 1. Сохраняем базового пользователя (в этот момент срабатывает ваш сигнал post_save и создает пустой профиль)
         user = super().save(commit=commit)
         
         if commit:
-            # 2. Получаем автоматически созданный профиль и перезаписываем значения из формы
             profile = user.profile
             profile.department = self.cleaned_data['department']
             profile.role = self.cleaned_data['role']

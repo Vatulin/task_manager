@@ -4,7 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Q
 from django.utils import timezone
 from tasks.models import Task
-from users.models import UserProfile, Department  # 👈 Импортируем динамическую модель Department
+from users.models import UserProfile, Department
 from datetime import timedelta
 import json
 
@@ -34,16 +34,15 @@ def admin_analytics(request):
         ).count()
 
         departments_stats.append({
-            'id': dept.id,               # 👈 ID для генерации корректных URL-адресов
-            'name': dept.name,           # Название из БД (например, "ИТ", "HR")
-            'users': UserProfile.objects.filter(department=dept).count(), # Кол-во людей в отделе
+            'id': dept.id, 
+            'name': dept.name,   
+            'users': UserProfile.objects.filter(department=dept).count(),
             'total': total,
             'completed': completed,
             'overdue': overdue,
             'completion_rate': round(completed / total * 100, 1) if total > 0 else 0
         })
 
-    # === 2. Выполнение планов по периодам ===
     periods = {
         'year': {'label': 'Год', 'period_value': PERIOD_YEAR},
         'quarter': {'label': 'Квартал', 'period_value': PERIOD_QUARTER},
@@ -112,8 +111,7 @@ def admin_analytics(request):
 @login_required
 def department_report(request, department_code=None):
     """
-    department_code теперь принимает ID (int) записи из таблицы Department 
-    или None для отображения 'Все отделы'
+    department_code теперь принимает ID записи из таблицы Department или None для отображения 'Все отделы'
     """
     profile = getattr(request.user, 'profile', None)
     if not profile or profile.role != 'admin':

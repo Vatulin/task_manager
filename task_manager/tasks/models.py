@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-# Импортируем динамическую модель отделов
 from users.models import Department  
 
 class Task(models.Model):
@@ -25,11 +24,9 @@ class Task(models.Model):
     def get_status_choices(self):
         return self._meta.get_field('status').choices
 
-    # Основные поля модели
     title = models.CharField(max_length=255, verbose_name="Название")
     description = models.TextField(verbose_name="Описание", blank=True)
     
-    # Связь с кастомным пользователем
     assignee = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -39,10 +36,9 @@ class Task(models.Model):
         verbose_name="Ответственный"
     )
     
-    # ИЗМЕНЕНО: Теперь это связь ForeignKey с динамической моделью отделов
     department = models.ForeignKey(
         Department,
-        on_delete=models.PROTECT,  # Запретит удалять отдел, если к нему привязаны задачи
+        on_delete=models.PROTECT,
         related_name='tasks',
         verbose_name="Отдел"
     )

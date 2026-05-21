@@ -405,17 +405,14 @@ body {
     }
 }
 
-/* Вспомогательные классы уменьшенных шрифтов */
 .xsmall {
     font-size: 0.75rem;
 }
 
-/* Мягкий фон для предупреждений, не выбивающийся из строгого дизайна */
 .bg-danger-light {
     background-color: #fff8f8;
 }
 
-/* Оформление кастомной легенды под графиками */
 .chart-legend-box {
     width: 12px;
     height: 12px;
@@ -428,7 +425,6 @@ body {
     cursor: pointer;
 }
 
-/* Стилизация раскрывающихся списков details */
 .custom-details summary {
     list-style: none;
     outline: none;
@@ -448,7 +444,6 @@ body {
     content: '  • Скрыть';
 }
 
-/* Тонкая доработка таблиц аналитики */
 .custom-analytics-table th {
     font-size: 0.8rem;
     letter-spacing: 0.03em;
@@ -458,12 +453,10 @@ body {
     border-color: var(--bs-gray-200) !important;
 }
 
-/* Плавные анимации переходов элементов */
 .animate-transition {
     transition: all 0.2s ease-in-out;
 }
 
-/* Эффекты интерактивности для строк списка задач */
 .custom-task-item:hover .custom-title-hover {
     color: var(--bs-primary) !important;
 }
@@ -493,13 +486,11 @@ body {
     border-top: 1px solid var(--bs-border-color) !important;
 }
 
-/* Строгий вид элементов ввода */
 .form-control, .form-select, .form-check-input {
-    border-radius: 0.375rem; /* Стандартный радиус Bootstrap вместо огромных скруглений */
+    border-radius: 0.375rem; 
     border-color: var(--bs-gray-300);
 }
 
-/* Стилизация контейнеров для кастомных чекбоксов */
 .data-form-group .form-check {
     display: flex;
     align-items: center;
@@ -507,32 +498,28 @@ body {
     min-height: 2.25rem;
 }
 
-/* Коррекция отображения ошибок */
 .invalid-feedback {
     font-size: 0.8rem;
     font-weight: 500;
 }
 
-/* Окно корпоративного чата */
 #chat-window {
     height: 520px;
     overflow-y: auto;
     background-color: var(--bs-gray-100) !important;
 }
 
-/* Базовый класс сообщения */
 .msg {
     max-width: 80%;
     margin-bottom: 1rem;
     padding: 0.75rem 1rem;
-    border-radius: 0.375rem; /* Строгий радиус Bootstrap вместо круглых баблов */
+    border-radius: 0.375rem; 
     font-size: 0.95rem;
     line-height: 1.5;
     white-space: pre-wrap;
     border: 1px solid transparent;
 }
 
-/* Сообщение пользователя */
 .msg-user {
     background-color: var(--bs-white);
     color: var(--bs-dark);
@@ -540,7 +527,6 @@ body {
     margin-left: auto;
 }
 
-/* Сообщение ИИ */
 .msg-ai {
     background-color: var(--bs-primary-subtle);
     color: var(--bs-primary-text-emphasis);
@@ -548,7 +534,6 @@ body {
     margin-right: auto;
 }
 
-/* Системное сообщение об ошибке */
 .msg-system {
     background-color: var(--bs-danger-subtle);
     color: var(--bs-danger-text-emphasis);
@@ -558,7 +543,6 @@ body {
     font-size: 0.85rem;
 }
 
-/* Скрытый блок мыслей ИИ (<thinking>) */
 .ai-thoughts-summary {
     cursor: pointer; 
     color: var(--bs-secondary); 

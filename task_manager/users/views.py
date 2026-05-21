@@ -10,7 +10,6 @@ from tasks.models import Task
 
 User = get_user_model()
 
-# 🔒 Декоратор проверки роли
 def role_required(allowed_roles):
     def decorator(view_func):
         def wrapper(request, *args, **kwargs):
@@ -50,7 +49,6 @@ def profile_view(request, user_id=None):
     profile = getattr(user, 'profile', None)
     tasks = Task.objects.filter(assignee=user)
 
-    # 🔍 Определяем роль текущего залогиненного пользователя
     current_profile = getattr(request.user, 'profile', None)
     current_role = current_profile.role if current_profile else None
 

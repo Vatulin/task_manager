@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const sendBtn = document.getElementById('send-btn');
     const chatLoader = document.getElementById('chat-loader');
 
-    // Безопасное извлечение CSRF-токена из куки для закрытого контура Django
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -31,7 +30,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     </details>`;
         });
         
-        // Превращение маркдауна **текст** в теги строгой жирности
         formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         formatted = formatted.replace(/\n/g, '<br>');
         
@@ -59,7 +57,6 @@ document.addEventListener('DOMContentLoaded', function () {
         appendMessage(message, 'msg-user');
         userInput.value = '';
 
-        // Корректное переключение состояния интерфейса при генерации
         if (chatLoader) chatLoader.style.display = 'flex';
         sendBtn.disabled = true;
         userInput.disabled = true;

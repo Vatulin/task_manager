@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     {
                         label: 'Просрочено',
                         data: overdueData,
-                        backgroundColor: '#dc3545', // Соответствует цвету btn-danger
+                        backgroundColor: '#dc3545',
                         borderColor: '#dc3545',
                         borderWidth: 1,
                         borderRadius: 3,

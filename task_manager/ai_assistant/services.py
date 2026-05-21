@@ -55,7 +55,7 @@ def talk_to_corporate_ai(user_message, history=None):
     url = getattr(settings, 'OLLAMA_CHAT_URL', 'http://localhost:11434/api/chat')
     
     try:
-        response = requests.post(url, json=payload, timeout=20) # Таймаут 20с
+        response = requests.post(url, json=payload, timeout=20)
         return response.json().get('message', {}).get('content', 'Ошибка генерации.')
     except Exception as e:
         return f"ИИ сейчас недоступен (ошибка: {e})"
