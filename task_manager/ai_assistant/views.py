@@ -4,9 +4,15 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from .services import talk_to_corporate_ai
+from django.core.exceptions import PermissionDenied
 
 @login_required
 def ai_chat(request):
+    profile = getattr(request.user, 'profile', None)
+    
+    if not profile or profile.role != 'admin':
+        raise PermissionDenied
+
     request.session['chat_history'] = []
     return render(request, "ai/chat.html")
 
