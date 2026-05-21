@@ -7,6 +7,8 @@ from tasks.models import Task
 from users.models import UserProfile, Department
 from datetime import timedelta
 import json
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
 
 @login_required
 def admin_analytics(request):
@@ -159,3 +161,54 @@ def department_report(request, department_code=None):
         'now': now,
     }
     return render(request, 'analytics/department_report.html', context)
+
+@login_required
+def kanban_board(request):
+    user = request.user
+    profile = getattr(user, 'profile', None)
+    
+    if profile and profile.role == 'admin':
+        queryset = Task.objects.all()
+    elif profile and profile.role == 'team_lead':
+        if profile.department:
+            queryset = Task.objects.filter(assignee__profile__department=profile.department)
+        else:
+            queryset = Task.objects.none()
+    else:
+        queryset = Task.objects.filter(assignee=user)
+        
+    queryset = queryset.select_related('assignee__profile__department')
+    
+    context = {
+        'profile': profile,
+        'tasks_new': queryset.filter(status='NEW'),
+        'tasks_progress': queryset.filter(status='IN_PROGRESS'),
+        'tasks_review': queryset.filter(status='REVIEW'),
+        'tasks_completed': queryset.filter(status='COMPLETED'),
+        'tasks_overdue': queryset.filter(status='OVERDUE'),
+    }
+    return render(request, 'analytics/kanban.html', context)
+
+
+@login_required
+def update_task_status(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            task_id = data.get('task_id')
+            new_status = data.get('status')
+        except json.JSONDecodeError:
+            task_id = request.POST.get('task_id')
+            new_status = request.POST.get('status')
+
+        if not task_id or not new_status:
+            return JsonResponse({'status': 'error', 'message': 'Отсутствуют обязательные параметры'}, status=400)
+
+        task = get_object_or_404(Task, id=task_id)
+        
+        task.status = new_status
+        task.save()
+
+        return JsonResponse({'status': 'success', 'message': 'Статус успешно обновлен'})
+
+    return JsonResponse({'status': 'error', 'message': 'Метод запроса не поддерживается'}, status=405)

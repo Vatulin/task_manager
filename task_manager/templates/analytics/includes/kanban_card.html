@@ -1,0 +1,26 @@
+<div class="card kanban-card mb-2 shadow-sm" draggable="true" data-task-id="{{ task.id }}">
+    <div class="card-body p-2.5">
+        <div class="d-flex justify-content-between align-items-start mb-1">
+            <span class="badge bg-light text-secondary border border-secondary-subtle xsmall">
+                ID-{{ task.id }}
+            </span>
+            <span class="xsmall text-muted">
+                {{ task.deadline|date:"d.m.Y"|default:"Без дедлайна" }}
+            </span>
+        </div>
+        <h6 class="card-title text-dark font-weight-bold mb-1 small text-truncate">
+            {{ task.title }}
+        </h6>
+        <p class="card-text text-secondary xsmall text-truncate-2 mb-2">
+            {{ task.description|default:"Описание отсутствует" }}
+        </p>
+        <div class="border-top pt-1 d-flex justify-content-between align-items-center">
+            <span class="xsmall text-primary font-weight-bold">
+                {{ task.assignee.username|default:"Не назначен" }}
+            </span>
+            <span class="xsmall text-muted text-uppercase">
+                {{ task.assignee.profile.department.name|default:"-" }}
+            </span>
+        </div>
+    </div>
+</div>
