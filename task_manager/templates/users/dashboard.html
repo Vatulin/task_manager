@@ -80,10 +80,10 @@
                             </a>
                         </div>
                         <div class="col-12 col-sm-6">
-                            <div class="card h-100 bg-action-block p-3 opacity-50 border-dashed">
-                                <span class="d-block fw-bold text-secondary small mb-1">Нагрузка команды (В разработке)</span>
-                                <span class="text-muted small-text">Диаграмма распределения задач между сотрудниками.</span>
-                            </div>
+                            <a href="{% url 'analytics:department_report' profile.department.id %}" class="card h-100 bg-action-block p-3 text-decoration-none dashboard-action-card">
+                                <span class="d-block fw-bold text-dark small mb-1">Нагрузка команды и аналитика</span>
+                                <span class="text-muted small-text">Детальная статистика и распределение задач по вашему отделу.</span>
+                            </a>
                         </div>
                     </div>
                 </div>

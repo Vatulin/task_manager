@@ -114,8 +114,11 @@ def department_report(request, department_code=None):
     department_code теперь принимает ID записи из таблицы Department или None для отображения 'Все отделы'
     """
     profile = getattr(request.user, 'profile', None)
-    if not profile or profile.role != 'admin':
-        raise PermissionDenied("Доступ только для администраторов")
+    if profile.role == 'team_lead':
+        if department_code is None or int(department_code) != profile.department_id:
+            raise PermissionDenied("Вы можете просматривать только аналитику своего отдела")
+    elif profile.role != 'admin':
+        raise PermissionDenied("Доступ только для администраторов и руководителей")
 
     now = timezone.now()
     STATUS_COMPLETED = Task.StatusChoices.COMPLETED.value
