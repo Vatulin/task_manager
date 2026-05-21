@@ -1,40 +1,45 @@
 import requests
 from django.conf import settings
-from .tools import get_db_snapshot, get_task_list
+from tasks.models import Task
 
-def route_user_intent(message: str):
-    msg = message.lower()
+def get_all_tasks_complete_data():
+    tasks = Task.objects.select_related('assignee').all()
     
-    if any(word in msg for word in ["покажи задачи", "список задач", "что в работе"]):
-        return "fast_list", get_task_list(keyword="")
+    if not tasks:
+        return "В системе нет задач."
     
-    if any(word in msg for word in ["статус", "сводка", "отчет", "как дела"]):
-        return "fast_snapshot", get_db_snapshot()
-    return "llm", None
+    data_lines = []
+    for t in tasks:
+        assignee = getattr(t.assignee, 'username', 'Не назначен')
+        status = t.get_status_display()
+        
+        line = (
+            f"- Задача: '{t.title}' | "
+            f"Статус: {status} | "
+            f"Ответственный: {assignee} | "
+            f"Отдел: {getattr(t, 'department', 'Не указан')} | "
+            f"Приоритет: {getattr(t, 'priority', 'Обычный')} | "
+            f"Дедлайн: {getattr(t, 'deadline', 'Нет')} | "
+            f"Горизонт: {t.get_period_display()}"
+        )
+        data_lines.append(line)
+    
+    return "\n".join(data_lines)
 
 def talk_to_corporate_ai(user_message, history=None):
-    intent, data = route_user_intent(user_message)
-    
-    if intent == "fast_list":
-        return f"Вот последние задачи:\n\n{data}"
-    if intent == "fast_snapshot":
-        return f"Текущая сводка:\n\n{data}"
-
-    context = get_task_list(keyword=user_message)
-    
-    if not context or "нет" in context.lower():
-        system_context = "В данный момент нет задач, соответствующих запросу."
+    if len(user_message) < 20 and any(w in user_message.lower() for w in ["привет", "как дела", "здравствуй"]):
+        all_data = "Пользователь просто здоровается."
     else:
-        system_context = f"ДАННЫЕ ИЗ БАЗЫ:\n{context}"
-
+        all_data = get_all_tasks_complete_data()
     system_content = (
         "Ты — аналитик данных компании 'Транстелематика'.\n"
-        "Правила:\n"
-        "1. Отвечай кратко и по делу.\n"
-        "2. Если данных нет, честно скажи: 'Я не нашел информации по этому запросу'.\n"
-
-        "3. Используй ТОЛЬКО предоставленные данные.\n\n"
-        f"{system_context}"
+        "Твоя задача — отвечать на вопросы пользователя, основываясь на ПОЛНОМ списке задач.\n"
+        "ПРАВИЛА:\n"
+        "1. Анализируй весь список задач, предоставленный ниже.\n"
+        "2. Не фильтруй данные самостоятельно, если об этом не просит пользователь.\n"
+        "3. .\n"
+        "3. Будь точен и не выдумывай статус задачи, если его нет в данных.\n\n"
+        f"ПОЛНЫЙ СПИСОК ЗАДАЧ:\n{all_data}"
     )
 
     messages = [{"role": "system", "content": system_content}]
@@ -46,16 +51,13 @@ def talk_to_corporate_ai(user_message, history=None):
         "model": "llama3.1:8b",
         "messages": messages,
         "stream": False,
-        "options": {
-            "temperature": 0.1,
-            "num_predict": 300
-        }
+        "options": {"temperature": 0.2}
     }
 
     url = getattr(settings, 'OLLAMA_CHAT_URL', 'http://localhost:11434/api/chat')
     
     try:
-        response = requests.post(url, json=payload, timeout=20)
-        return response.json().get('message', {}).get('content', 'Ошибка генерации.')
+        response = requests.post(url, json=payload, timeout=180)
+        return response.json().get('message', {}).get('content', 'Ошибка ответа.')
     except Exception as e:
-        return f"ИИ сейчас недоступен (ошибка: {e})"
+        return f"Ошибка связи с ИИ: {e}"
