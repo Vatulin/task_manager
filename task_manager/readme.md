@@ -15,13 +15,17 @@ cd task_manager
 docker-compose up --build
 ```
 
-????????
+Зайдем в контейнер:
 ```
-docker exec -it task_manager-ollama-1 ollama run llama3.1:8b
-```
-
-Зайдем в койнер
-```
-docker exec -it <контейнер> /bin/bash
+docker exec -it task_manager-app-1 /bin/bash
 ```
 
+Создадим суперпользователя(email вводить необязательно):
+```
+python manage.py createsuperuser
+```
+
+Чтобы выйти из контейнера:
+```
+exit
+```
