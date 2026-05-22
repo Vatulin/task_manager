@@ -20,6 +20,11 @@ docker compose up --build -d
 docker exec -it task_manager-app-1 /bin/bash
 ```
 
+Применем миграции:
+```
+python manage.py migrate
+```
+
 Создадим суперпользователя(email вводить необязательно):
 ```
 python manage.py createsuperuser
