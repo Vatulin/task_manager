@@ -12,7 +12,7 @@ cd task_manager
 
 Сборка и запуск контейнеров:
 ```
-docker-compose up --build
+docker compose up --build -d
 ```
 
 Зайдем в контейнер:
