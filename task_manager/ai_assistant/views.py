@@ -35,7 +35,7 @@ def ai_chat_api(request):
             if len(history) > 12:
                 history = history[-12:]
             
-            ai_response = talk_to_corporate_ai(user_message, history)
+            ai_response = talk_to_corporate_ai(user_message, history, user=request.user)
             
             history.append({"role": "user", "content": user_message})
             history.append({"role": "assistant", "content": ai_response})
