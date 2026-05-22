@@ -71,7 +71,8 @@ def task_detail(request, task_id):
     context = {
         'task': task,
         'comments': comments,
-        'status_choices': status_choices
+        'status_choices': status_choices,
+        'profile': profile,
     }
     return render(request, 'tasks/task_detail.html', context)
 
@@ -125,3 +126,25 @@ def create_task(request):
         form = TaskForm(user=request.user)
         
     return render(request, 'tasks/task_form.html', {'form': form})
+
+@login_required
+@require_POST
+def task_delete(request, task_id):
+    user = request.user
+    profile = getattr(user, 'profile', None)
+    task = get_object_or_404(Task, id=task_id)
+    print(profile.role)
+    
+    if profile and profile.role == 'admin':
+        task.delete()
+    elif profile and profile.role == 'team_lead':
+        task_department = getattr(task.assignee.profile, 'department', None) if task.assignee else None
+        
+        if task_department and task_department == profile.department:
+            task.delete()
+        else:
+            raise PermissionDenied("Вы можете удалять задачи только своего отдела.")
+    else:
+        raise PermissionDenied("У вас недостаточно прав для удаления этой задачи.")
+        
+    return redirect('tasks:task_list')
