@@ -142,7 +142,7 @@ def extract_task_data_from_message(user_message, context_data="", pending_data=N
         "options": {"temperature": 0.1}
     }
     
-    url = getattr(settings, 'OLLAMA_CHAT_URL', 'http://ollama:11434/api/chat')
+    url = getattr(settings, 'OLLAMA_CHAT_URL', 'http://localhost:11434/api/chat')
     
     try:
         response = requests.post(url, json=payload, timeout=60)
@@ -264,7 +264,7 @@ def talk_to_corporate_ai(user_message, history=None, user=None):
         "options": {"temperature": 0.2}
     }
 
-    url = getattr(settings, 'OLLAMA_CHAT_URL', 'http://ollama:11434/api/chat')  
+    url = getattr(settings, 'OLLAMA_CHAT_URL', 'http://localhost:11434/api/chat')  
     
     try:
         response = requests.post(url, json=payload, timeout=180)
